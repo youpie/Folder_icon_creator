@@ -24,6 +24,7 @@ use crate::objects::errors::show_error_popup;
 use crate::objects::file::file::File;
 use crate::objects::properties::{BottomImageType, CustomRGB};
 use adw::{prelude::*, subclass::prelude::*};
+use gdk4::MemoryTexture;
 use gettextrs::gettext;
 use gio::prelude::SettingsExt;
 use gtk::gdk::RGBA;
@@ -609,16 +610,14 @@ impl IconicWindow {
         let (width, height) = rgba_image.dimensions();
         let pixels = rgba_image.into_raw(); // Get the raw pixel data
         // Create Pixbuf from raw pixel data
-        let pixbuf = Pixbuf::from_bytes(
-            &glib::Bytes::from(&pixels),
-            gtk::gdk_pixbuf::Colorspace::Rgb,
-            true, // has_alpha
-            8,    // bits_per_sample
+        MemoryTexture::new(
             width as i32,
             height as i32,
-            width as i32 * 4, // rowstride
-        );
-        gdk::Texture::for_pixbuf(&pixbuf)
+            gdk4::MemoryFormat::R8g8b8a8,
+            &glib::Bytes::from(&pixels),
+            width as usize * 4,
+        )
+        .upcast()
     }
 
     // TODO decouple UI components from these functions

@@ -197,7 +197,7 @@ If you like this app, feel free to donate, I would really appreciate it!",
             .issue_url("https://github.com/youpie/Iconic/issues")
             .website("https://github.com/youpie/Iconic")
             .license_type(License::Gpl30)
-            .copyright("© 2025 YoupDeGamerNL")
+            .copyright("© 2026 YoupDeGamerNL\nPlease note that I am proud of you and think you are good enough as you are!!!")
             .build();
         about.add_credit_section(Some("Supporters of iconic"), &["Nido", "Jala015"]);
         about.add_acknowledgement_section(
