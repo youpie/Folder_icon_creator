@@ -13,7 +13,7 @@ use adw::{Toast, prelude::*};
 use gettextrs::gettext;
 use gio::{
     SimpleAction,
-    glib::{VariantTy, clone, subclass::basic::ClassStruct},
+    glib::{VariantTy, clone, subclass::basic::ClassStruct, user_cache_dir},
 };
 use gtk::glib;
 use log::*;
@@ -223,7 +223,7 @@ pub fn set_up_klass_actions(klass: &mut ClassStruct<IconicWindow>) {
         ));
     });
     klass.install_action("app.monochrome_switch", None, move |win, _, _| {
-        win.monochrome_swtich_change();
+        win.monochrome_switch_change();
     });
     klass.install_action("app.reset_color", None, move |win, _, _| {
         win.reset_colors();
@@ -231,7 +231,7 @@ pub fn set_up_klass_actions(klass: &mut ClassStruct<IconicWindow>) {
 
     klass.install_action("app.debug_mask", None, move |win, _, _| {
         let imp = win.imp();
-        let mut cache_path = crate::IconicWindow::get_cache_path();
+        let mut cache_path = user_cache_dir();
         cache_path.push("mask.png");
         let mask = imp.bottom_image_file.lock().unwrap().clone();
         if let Some(mask) = mask {

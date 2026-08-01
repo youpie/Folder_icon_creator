@@ -8,7 +8,7 @@ use crate::objects::properties::CustomRGB;
 use adw::TimedAnimation;
 use adw::{prelude::*, subclass::prelude::*};
 use gettextrs::{gettext, ngettext};
-use gio::glib;
+use gio::glib::{self, user_cache_dir, user_data_dir};
 use gio::prelude::SettingsExt;
 use gtk::gdk::RGBA;
 use gtk::gio;
@@ -50,14 +50,14 @@ impl IconicWindow {
             .file_properties
             .borrow()
             .bottom_image_type
-            .is_strict_compatible()
+            .is_regeneration_compatible()
             == None
         {
             info!("Current file does not use a compatible bottom image. no use caching the file");
             return Ok(());
         }
         //create folder inside cache, if it does not yet exist
-        let cache_path = Self::get_cache_path().join("top_images");
+        let cache_path = user_cache_dir().join("top_images");
         if !cache_path.exists() {
             debug!("Top icon cache dir does not yet exist, creating");
             fs::create_dir(&cache_path)?;
@@ -66,6 +66,7 @@ impl IconicWindow {
         let mut file_path = cache_path.clone();
         file_path.push(file_name.to_string());
         debug!("File path: {:?}", file_path);
+        self.store_mask_in_cache();
         debug!("File name: {:?}", file.filename);
         match file_path.exists() {
             true => {
@@ -95,6 +96,17 @@ impl IconicWindow {
         Ok(())
     }
 
+    fn store_mask_in_cache(&self) -> GenResult<()> {
+        let imp = self.imp();
+
+        if let Some(mask) = imp.custom_mask.borrow().clone() {
+        } else {
+            let path = user_cache_dir();
+            info!("No custom mask")
+        }
+        Ok(())
+    }
+
     // This function regenerates icon, it replaces all images that were dragged and dropped with ones of the correct system accent color.
     pub async fn regenerate_icons(&self) -> GenResult<()> {
         let imp = self.imp();
@@ -102,7 +114,7 @@ impl IconicWindow {
         // First set iconic as busy. By getting a Arc reference
         // I doubt this is the best approach, but Hey it works!
         let _iconic_busy = Arc::clone(&imp.app_busy);
-        let data_path = self.get_data_path();
+        let data_path = user_data_dir();
         let mut incompatible_files_n: u32 = 0;
         let compatible_files =
             self.find_regeneratable_icons(data_path, &mut incompatible_files_n)?;
@@ -213,6 +225,7 @@ impl IconicWindow {
                     self.get_bottom_icon_from_accent_color(None, strict_mode_enabled)
                         .await?,
                     // TODO No mask
+                    // self.serve_mask(),
                     None,
                     None,
                     None,
@@ -265,7 +278,7 @@ impl IconicWindow {
 
         // If strict mode is disabled and the image is not regenerated during strict mode. And the image is regenerated, is has te be regenerated to mark it as no longer default
         properties.default = if !strict_mode_enabled
-            && properties.bottom_image_type.is_strict_compatible() == Some(false)
+            && properties.bottom_image_type.is_regeneration_compatible() == Some(false)
         {
             false
         } else {
@@ -274,7 +287,7 @@ impl IconicWindow {
 
         // Create the path where the top image of this file is located
         // The top image has the same name as the hash of that image
-        let mut top_image_path = Self::get_cache_path().join("top_images");
+        let mut top_image_path = user_cache_dir().join("top_images");
         top_image_path.push(
             properties
                 .top_image_hash
@@ -357,7 +370,7 @@ impl IconicWindow {
         dir: PathBuf,
         incompatible_files: &mut u32,
     ) -> GenResult<Vec<(FileProperties, fs::DirEntry, PropertiesSource)>> {
-        let top_image_path = Self::get_cache_path().join("top_images");
+        let top_image_path = user_cache_dir().join("top_images");
         let mut regeneratable: Vec<(FileProperties, fs::DirEntry, PropertiesSource)> = vec![];
         // Walk the directory and loop over every file
         let files: fs::ReadDir = fs::read_dir(&dir)?;
@@ -382,7 +395,7 @@ impl IconicWindow {
             if properties
                 .0
                 .bottom_image_type
-                .is_strict_compatible()
+                .is_regeneration_compatible()
                 .is_none()
             {
                 *incompatible_files += 1;

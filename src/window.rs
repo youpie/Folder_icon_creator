@@ -26,16 +26,14 @@ use crate::objects::properties::{BottomImageType, CustomRGB};
 use adw::{prelude::*, subclass::prelude::*};
 use gdk4::MemoryTexture;
 use gettextrs::gettext;
+use gio::glib::user_cache_dir;
 use gio::prelude::SettingsExt;
 use gtk::gdk::RGBA;
-use gtk::gdk_pixbuf::Pixbuf;
 use gtk::{gdk, glib};
 use image::*;
 use log::*;
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::env;
-use std::fs;
 use std::hash::RandomState;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
@@ -461,7 +459,7 @@ impl IconicWindow {
     pub fn check_chache_icon(&self, file_name: &str) -> PathBuf {
         let imp = self.imp();
         let icon_path = PathBuf::from(&imp.settings.string("folder-svg-path"));
-        let cache_path = Self::get_cache_path();
+        let cache_path = user_cache_dir();
         let folder_icon_cache_path = cache_path.join(file_name);
         if folder_icon_cache_path.exists() {
             info!("File found in cache at: {:?}", folder_icon_cache_path);
@@ -487,39 +485,6 @@ impl IconicWindow {
 
         imp.settings.default_value("manual-bottom-image-selection");
         self.get_built_in_bottom_icon_path("None")
-    }
-
-    pub fn get_cache_path() -> PathBuf {
-        let cache_path = match env::var("XDG_CACHE_HOME") {
-            Ok(value) => PathBuf::from(value),
-            Err(_) => {
-                let config_dir = PathBuf::from(env::var("HOME").unwrap())
-                    .join(".cache")
-                    .join(format!("nl.emphisia.icon"));
-                if !config_dir.exists() {
-                    fs::create_dir(&config_dir).unwrap();
-                }
-                config_dir
-            }
-        };
-        debug!("cache path {:?}", cache_path);
-        cache_path
-    }
-
-    pub fn get_data_path(&self) -> PathBuf {
-        let data_path = match env::var("XDG_DATA_HOME") {
-            Ok(value) => PathBuf::from(value),
-            Err(_) => {
-                let config_dir = PathBuf::from(env::var("HOME").unwrap())
-                    .join(".data")
-                    .join("nl.emphisia.icon");
-                if !config_dir.exists() {
-                    fs::create_dir(&config_dir).unwrap();
-                }
-                config_dir
-            }
-        };
-        data_path
     }
 
     // This checks if the main page, or welcome screen needs to be shown. And adds ability to loads just a bottom file
@@ -621,7 +586,7 @@ impl IconicWindow {
     }
 
     // TODO decouple UI components from these functions
-    pub fn monochrome_swtich_change(&self) {
+    pub fn monochrome_switch_change(&self) {
         let imp = self.imp();
         let switch_state = imp.monochrome_switch.is_active();
         debug!("Updating monochrome state to {:?}", switch_state);

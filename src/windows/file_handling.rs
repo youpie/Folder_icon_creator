@@ -4,6 +4,7 @@ use crate::objects::file::mask::MaskOption;
 use crate::objects::properties::{BottomImageType, FileProperties, MaskType};
 use adw::{prelude::*, subclass::prelude::*};
 use gettextrs::gettext;
+use gio::glib::user_cache_dir;
 use gio::*;
 use gtk::{gdk, glib};
 use image::*;
@@ -84,7 +85,7 @@ impl IconicWindow {
             })
             .collect();
         let new_custom_folder_bytes = new_custom_folder.as_bytes().to_owned();
-        let mut cache_location = Self::get_cache_path();
+        let mut cache_location = user_cache_dir();
         cache_location.push(format!(
             "custom_folder{}.svg",
             if regeneration { "_regeneration" } else { "" }

@@ -21,8 +21,8 @@ impl IconicWindow {
         let properties = imp.file_properties.borrow().clone();
         let mask = properties
             .bottom_image_type
-            .is_strict_compatible()
-            .map(|_| self.load_default_mask());
+            .is_regeneration_compatible()
+            .map(|_| self.load_default_mask_path());
         match mask {
             Some(mask_path) => MaskOption::Custom(mask_path),
             None => MaskOption::Automatic,
@@ -61,7 +61,7 @@ impl IconicWindow {
         }
     }
 
-    fn load_default_mask(&self) -> PathBuf {
+    fn load_default_mask_path(&self) -> PathBuf {
         let mut path = self.get_built_in_bottom_icon_path("None");
         path.set_file_name("mask.svg");
         path

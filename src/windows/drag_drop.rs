@@ -2,6 +2,7 @@ use crate::objects::errors::ErrorPopup;
 use crate::{IconicWindow, window};
 use crate::{glib::clone, objects::errors::show_error_popup};
 use adw::subclass::prelude::*;
+use gio::glib::user_data_dir;
 use gio::{glib, prelude::*};
 use gtk::gdk;
 use gtk::prelude::WidgetExt;
@@ -159,7 +160,7 @@ impl IconicWindow {
     }
 
     pub fn create_drag_file(&self, temp: bool) -> gio::File {
-        let data_path = self.get_data_path();
+        let data_path = user_data_dir();
         debug!("data path: {:?}", data_path);
         let mut file_path = data_path.clone();
         let random_string = Uuid::now_v7();

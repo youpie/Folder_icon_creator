@@ -291,7 +291,7 @@ pub enum BottomImageType {
 impl BottomImageType {
     // Whether this image is able to be regenerate with strict mode enabled
     // By returning none, the image is not at all compatible for regeneration
-    pub fn is_strict_compatible(&self) -> Option<bool> {
+    pub fn is_regeneration_compatible(&self) -> Option<bool> {
         match self {
             Self::FolderSystem => Some(true),
             Self::FolderCustom(_, _) => Some(false),

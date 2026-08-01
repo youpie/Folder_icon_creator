@@ -10,6 +10,7 @@ use adw::subclass::prelude::AdwDialogImpl;
 use gdk4::RGBA;
 use gettextrs::*;
 use gio::AppInfo;
+use gio::glib::user_cache_dir;
 use gtk::glib;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
@@ -476,7 +477,7 @@ impl PreferencesDialog {
     pub async fn open_image_cache(&self, _button: adw::ButtonRow) {
         let file = gio::File::for_path(format!(
             "{}/top_images/",
-            IconicWindow::get_cache_path().to_str().unwrap()
+            user_cache_dir().to_str().unwrap()
         ))
         .uri();
         if let Err(e) = AppInfo::launch_default_for_uri(&file, None::<&gio::AppLaunchContext>) {
