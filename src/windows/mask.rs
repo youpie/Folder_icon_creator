@@ -10,10 +10,15 @@ use crate::{
     GenResult,
     objects::{
         file::{file::File, mask::MaskOption},
-        properties::MaskType,
+        properties::{FileProperties, MaskType},
     },
     window::IconicWindow,
 };
+
+/* 
+    TODO please add a small explanation of the mask logic,
+    how do I keep building new features which are so complicatedly built that forget how they work :/
+*/
 
 impl IconicWindow {
     pub fn get_mask_path(&self) -> MaskOption {
@@ -97,5 +102,14 @@ impl IconicWindow {
             imp.custom_mask.replace(Some(image.0));
         }
         Ok(())
+    }
+
+    pub fn load_mask(&self, properties: &FileProperties, file_name: &str) -> Option<DynamicImage> {
+        let imp = self.imp();
+        let mask_type = properties.mask;
+        match mask_type {
+            MaskType::Automatic => 
+        }
+        None
     }
 }

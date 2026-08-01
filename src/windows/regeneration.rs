@@ -12,6 +12,7 @@ use gio::glib::{self, user_cache_dir, user_data_dir};
 use gio::prelude::SettingsExt;
 use gtk::gdk::RGBA;
 use gtk::gio;
+use image::ImageFormat::Png;
 use image::*;
 use log::*;
 use std::fs::{self, DirEntry};
@@ -66,7 +67,6 @@ impl IconicWindow {
         let mut file_path = cache_path.clone();
         file_path.push(file_name.to_string());
         debug!("File path: {:?}", file_path);
-        self.store_mask_in_cache();
         debug!("File name: {:?}", file.filename);
         match file_path.exists() {
             true => {
@@ -93,16 +93,24 @@ impl IconicWindow {
         }
         info!("Saving dynamic image to cache");
         file.image.save_with_format(file_path, ImageFormat::WebP)?;
+
         Ok(())
     }
 
-    fn store_mask_in_cache(&self) -> GenResult<()> {
+    pub fn store_mask_in_cache(&self, main_filename: &str) -> GenResult<()> {
         let imp = self.imp();
 
         if let Some(mask) = imp.custom_mask.borrow().clone() {
+            let cache_path = user_cache_dir().join("mask");
+            if !cache_path.exists() {
+                debug!("mask cache path not found, creating");
+                fs::create_dir(&cache_path)?;
+            }
+            let mask_path = cache_path.clone().join(main_filename.to_owned());
+            debug!("Saving custom mask");
+            mask.save_with_format(mask_path, Png)?;
         } else {
-            let path = user_cache_dir();
-            info!("No custom mask")
+            debug!("No custom mask")
         }
         Ok(())
     }
