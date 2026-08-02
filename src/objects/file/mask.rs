@@ -1,12 +1,15 @@
 use std::path::PathBuf;
 
 use image::{DynamicImage, imageops};
+use log::*;
 
-use crate::GenResult;
+use crate::{GenResult, objects::file::file::File};
 
 type MainMask = DynamicImage;
 type ThumbnailMask = DynamicImage;
 
+/// A way to specify at what path the mask is located.
+/// Where if it is set to automatic, the path gets generated automatically
 #[derive(Debug, PartialEq)]
 pub enum MaskOption {
     Custom(PathBuf),
@@ -42,11 +45,35 @@ impl super::file::File {
         } else {
             Self::auto_generate_mask(&image)
         };
-        let thumbnail_mask = image_mask.clone().resize(
-            thumbnail_size,
-            thumbnail_size,
-            imageops::FilterType::Nearest,
-        );
-        Ok((Some(image_mask), Some(thumbnail_mask)))
+        let thumbnail_mask = if thumbnail_size > 0 {
+            Some(image_mask.clone().resize(
+                thumbnail_size,
+                thumbnail_size,
+                imageops::FilterType::Nearest,
+            ))
+        } else {
+            None
+        };
+        Ok((Some(image_mask), thumbnail_mask))
+    }
+
+    pub fn create_mask_dynamicimage(
+        mask_path: MaskOption,
+        bottom_image: &DynamicImage,
+    ) -> Option<DynamicImage> {
+        let size = bottom_image.height();
+        let mut auto_generated_mask = DynamicImage::new_rgba8(size, size);
+        if mask_path == MaskOption::Automatic {
+            auto_generated_mask = File::auto_generate_mask(bottom_image); // The auto generated mask only needs to be filled in if it actually needs to be created
+        }
+        match mask_path {
+            MaskOption::Disabled => None,
+            _ => File::get_masks(size, 0, &auto_generated_mask, mask_path)
+                .map(|x| {
+                    warn!("Failed to load mask, automatically generating");
+                    x.0.unwrap_or_else(|| File::auto_generate_mask(bottom_image))
+                })
+                .ok(),
+        }
     }
 }

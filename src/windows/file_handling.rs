@@ -566,7 +566,7 @@ impl IconicWindow {
             // A top image does not need a mask
             MaskOption::Disabled
         } else {
-            self.get_mask_path()
+            self.get_mask_path(None)
         };
 
         let new_file = match gio::spawn_blocking(move || {

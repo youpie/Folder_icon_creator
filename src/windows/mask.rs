@@ -2,8 +2,9 @@ use std::path::PathBuf;
 
 use adw::subclass::prelude::*;
 
+use gio::glib::user_cache_dir;
 use image::{DynamicImage, GenericImageView};
-use log::warn;
+use log::*;
 use uuid::Uuid;
 
 use crate::{
@@ -15,19 +16,20 @@ use crate::{
     window::IconicWindow,
 };
 
-/* 
+/*
     TODO please add a small explanation of the mask logic,
     how do I keep building new features which are so complicatedly built that forget how they work :/
 */
 
 impl IconicWindow {
-    pub fn get_mask_path(&self) -> MaskOption {
+    /// Pass `None` to properties if you want the global properties
+    pub fn get_mask_path(&self, properties: Option<FileProperties>) -> MaskOption {
         let imp = self.imp();
-        let properties = imp.file_properties.borrow().clone();
+        let properties = properties.unwrap_or(imp.file_properties.borrow().clone());
         let mask = properties
             .bottom_image_type
             .is_regeneration_compatible()
-            .map(|_| self.load_default_mask_path());
+            .map(|_| self.load_builtin_mask_path());
         match mask {
             Some(mask_path) => MaskOption::Custom(mask_path),
             None => MaskOption::Automatic,
@@ -35,7 +37,7 @@ impl IconicWindow {
     }
 
     /// Serve the correct mask based on settings
-    /// Pass the mask image from the `Iconic::File`
+    /// Pass the mask image from the `Iconic::File`.
     pub fn serve_mask(&self, mask: Option<DynamicImage>) -> Option<DynamicImage> {
         let imp = self.imp();
         if let Some(mask) = mask {
@@ -66,7 +68,7 @@ impl IconicWindow {
         }
     }
 
-    fn load_default_mask_path(&self) -> PathBuf {
+    fn load_builtin_mask_path(&self) -> PathBuf {
         let mut path = self.get_built_in_bottom_icon_path("None");
         path.set_file_name("mask.svg");
         path
@@ -104,12 +106,22 @@ impl IconicWindow {
         Ok(())
     }
 
-    pub fn load_mask(&self, properties: &FileProperties, file_name: &str) -> Option<DynamicImage> {
-        let imp = self.imp();
-        let mask_type = properties.mask;
-        match mask_type {
-            MaskType::Automatic => 
-        }
-        None
+    /// Load mask for regeneration
+    pub fn load_mask(
+        &self,
+        properties: &FileProperties,
+        file_name: &str,
+        bottom_image: &DynamicImage,
+    ) -> Option<DynamicImage> {
+        let mask_type = properties.mask.clone();
+        debug!("mask type for image {file_name} is {mask_type:?}");
+        let mask_path = match mask_type {
+            MaskType::Automatic => self.get_mask_path(Some(properties.clone())),
+            MaskType::Disabled => MaskOption::Disabled,
+            MaskType::Custom(_) => {
+                MaskOption::Custom(user_cache_dir().join("masks").join(file_name))
+            }
+        };
+        File::create_mask_dynamicimage(mask_path, bottom_image)
     }
 }
