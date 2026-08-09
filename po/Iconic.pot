@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iconic\n"
 "Report-Msgid-Bugs-To: https://github.com/youpie/Folder_icon_creator\n"
-"POT-Creation-Date: 2026-04-12 17:21+0200\n"
+"POT-Creation-Date: 2026-08-09 13:27+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,7 +20,8 @@ msgstr ""
 
 #: data/nl.emphisia.icon.desktop.in.in:2
 #: data/nl.emphisia.icon.metainfo.xml.in.in:5
-#: data/nl.emphisia.icon.metainfo.xml.in.in:208
+#: data/nl.emphisia.icon.metainfo.xml.in.in:221 src/window.blp:37
+#: src/window.blp:153
 msgid "Iconic"
 msgstr ""
 
@@ -66,375 +67,39 @@ msgstr ""
 msgid "Custom colored folder icons supported"
 msgstr ""
 
-#: data/nl.emphisia.icon.metainfo.xml.in.in:39
-msgid ""
-"Free Palestine🇵🇸. After a long wait, a new Iconic release is finally here! "
-"Featuring fun new features and fixes!"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:41
-msgid "Updated to Gnome 49"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:42
-msgid "Updated Regeneration Logic"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:43
-msgid "Added Kazakh, Russian and Persian language support"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:44
-msgid "Added ability to reset image"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:45
-msgid "Added ability to drag images from the browser"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:46
-msgid "Increased maximum size of top image"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:47
-msgid "Updated default settings"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:48
-msgid "Fixed Pop-up informing about accent color change on first run"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:50
-msgid "And many more changes, the full changelog can be found on GitHub!"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:51
-msgid "I hope life has been treating you well :)"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:56
-msgid ""
-"Here I am, once again. A new update to Iconic is here with the following "
-"changes!"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:58
-msgid "Improved code"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:59
-msgid "Decrease storage and memory size"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:60
-msgid "Improved app closing"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:61
-msgid "Updated to gnome 48"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:62
-msgid "Improved \"About Iconic\" dialog"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:63
-msgid "Removed donation button from hamburger menu"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:64
-msgid "Added keyboard shortcuts"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:65
-msgid "Improved accessibility"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:66
-msgid "Increased translatable elements"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:68
-msgid ""
-"I am doing a lot of this because I am planning to apply to gnome circle :)"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:69
-msgid "Remember to let me know if you encounter any bugs!"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:70
-msgid "Have a beautiful day <3"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:75
-msgid ""
-"A new version of Iconic! It is mostly a quality of life update, I have some "
-"fun additions planned so stay tuned!"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:76
-msgid "Here is what has changed:"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:78
-msgid "Updated to rust 2024 edition"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:79
-msgid "Removed regeneration screen"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:80
-msgid "Added regeneration bar on main screen"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:81
-msgid "Added better error handling for regeneration"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:82
-msgid "Updated pink folder, to be in line with Adwaita-colors"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:83
-msgid "Added acknowledgements in the About Iconic"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:84
-msgid "Fixed donation link"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:86
-msgid "As always, if you encounter any bugs. Please let me know on GitHub!"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:87
-msgid "Enjoy the update, and Free Palestine 🇵🇸"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:92
-msgid ""
-"I was really motivated so I made another update. Now allowing you to set "
-"custom collors for the folders. Other features include"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:94
-msgid "Made the app more responsive"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:95
-msgid "Removed crashing bug"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:96
-msgid "Removed small bugs"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:97
-msgid "Added Right-click menu to folder view"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:103
-msgid ""
-"A really big update for Iconic! You are now able to regenerate images with "
-"the correct accent color after you change it. This makes the app really nice "
-"to combine with \"Adwaita-Colors\""
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:104
-msgid ""
-"In Gnome 48, using static images in natilus might change. If that is the "
-"case I will retire the app. But for now I will keep working on the app!"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:109
-msgid ""
-"This is a nice big update to Iconic making it way more colorfull and better "
-"for gnome 47. Features include"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:111
-msgid "Custom accent color folders"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:112
-msgid "Accent color detection"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:113
-msgid "Updated settings"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:114
-msgid "Bug fixes!"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:116
-msgid "As always, please let me know if you encounter any bugs!"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:121
-msgid ""
-"This update to iconic is mostly just a version bump. However I do have some "
-"fun features I want to try and implement. If it is possible, idk yet. But I "
-"have already started working on it."
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:122
-msgid "Biggest changes"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:124
-msgid "Updated to gnome 47"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:125
-msgid "Using new loading animation"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:126
-msgid "Using new buttons in settings"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:132
-msgid ""
-"A new update to Iconic is here! It does not add many features but features a "
-"lot of improvements under the hood, this means the app will now crash way "
-"less often without any warning. Some changes include:"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:134
-msgid "Added ability to drag icon out of iconic directly"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:135
-msgid "Added error handling on opening files"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:136
-msgid "Added error handling on saving files"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:137
-msgid "Added donation link"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:138
-msgid "Added pop-up when dragging in files"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:139
-msgid "Updated Dutch translations"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:141
-msgid "Please report any bugs you see! Many thanks"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:146
-msgid ""
-"This is a new major release of Iconic. Featuring many bug fixes and added "
-"features. Some notable ones are:"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:148
-msgid "Drag and drop support"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:149
-msgid "Copy-paste support"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:150
-msgid "Better file type detection"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:151
-msgid "Updated dutch translations"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:152
-msgid "Added Hindi translations"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:153
-msgid "Fixed spelling mistakes"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:154
-msgid "Fixed issues with black pixels not converting to monochrome"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:160
-msgid "Another small update with a few additions and changes"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:162
-msgid "You can now open containing folder after saving image"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:163
-msgid "Added italian translation"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:164
-msgid "Updated Dutch translation"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:170
-msgid "This version adds a few small features and fixes some bugs"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:172
-msgid "The app now shows some errors as pop-ups"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:173
-msgid "You can now temporarily open a new folder image"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:174
-msgid "It now first shows a pop-up when the folder image is not found"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:180
-msgid "Initial release"
-msgstr ""
-
-#: data/nl.emphisia.icon.metainfo.xml.in.in:199
+#: data/nl.emphisia.icon.metainfo.xml.in.in:212
 msgid "icon"
 msgstr ""
 
-#: data/nl.emphisia.icon.metainfo.xml.in.in:200
+#: data/nl.emphisia.icon.metainfo.xml.in.in:213
 msgid "create"
 msgstr ""
 
-#: data/nl.emphisia.icon.metainfo.xml.in.in:201
+#: data/nl.emphisia.icon.metainfo.xml.in.in:214
 msgid "folder icon"
 msgstr ""
 
-#: data/nl.emphisia.icon.metainfo.xml.in.in:202
+#: data/nl.emphisia.icon.metainfo.xml.in.in:215
 msgid "svg"
 msgstr ""
 
-#: data/nl.emphisia.icon.metainfo.xml.in.in:203
+#: data/nl.emphisia.icon.metainfo.xml.in.in:216
 msgid "png"
 msgstr ""
 
-#: data/nl.emphisia.icon.metainfo.xml.in.in:204
+#: data/nl.emphisia.icon.metainfo.xml.in.in:217
 msgid "gnome"
 msgstr ""
 
-#: data/nl.emphisia.icon.metainfo.xml.in.in:205
+#: data/nl.emphisia.icon.metainfo.xml.in.in:218
 msgid "icon create"
 msgstr ""
 
-#: data/nl.emphisia.icon.metainfo.xml.in.in:206
+#: data/nl.emphisia.icon.metainfo.xml.in.in:219
 msgid "icon creator"
 msgstr ""
 
-#: data/nl.emphisia.icon.metainfo.xml.in.in:207
+#: data/nl.emphisia.icon.metainfo.xml.in.in:220
 msgid "folder icon creator"
 msgstr ""
 
@@ -443,7 +108,7 @@ msgid "Keyboard Shortcuts"
 msgstr ""
 
 #: src/gtk/shortcuts-dialog.blp:8
-msgid "Global"
+msgid "Image"
 msgstr ""
 
 #: src/gtk/shortcuts-dialog.blp:11
@@ -463,31 +128,45 @@ msgstr ""
 
 #: src/gtk/shortcuts-dialog.blp:26
 msgctxt "shortcut window"
-msgid "Regenerate Images"
+msgid "Reset Image"
 msgstr ""
 
 #: src/gtk/shortcuts-dialog.blp:31
 msgctxt "shortcut window"
-msgid "Reset Image"
+msgid "Regenerate Images"
 msgstr ""
 
-#: src/gtk/shortcuts-dialog.blp:36
+#: src/gtk/shortcuts-dialog.blp:37 src/settings/settings.blp:8
+msgid "General"
+msgstr ""
+
+#: src/gtk/shortcuts-dialog.blp:40
+msgctxt "shortcut window"
+msgid "Enable Advanced"
+msgstr ""
+
+#: src/gtk/shortcuts-dialog.blp:45
 msgctxt "shortcut window"
 msgid "Show Shortcuts"
 msgstr ""
 
-#: src/gtk/shortcuts-dialog.blp:41
+#: src/gtk/shortcuts-dialog.blp:50
 msgctxt "shortcut window"
 msgid "Open Preferences"
 msgstr ""
 
-#: src/gtk/shortcuts-dialog.blp:46
+#: src/gtk/shortcuts-dialog.blp:55
 msgctxt "shortcut window"
 msgid "Quit Iconic"
 msgstr ""
 
-#: src/settings/settings.blp:8
-msgid "General"
+#: src/gtk/shortcuts-dialog.blp:61 src/settings/settings.blp:240
+msgid "Advanced"
+msgstr ""
+
+#: src/gtk/shortcuts-dialog.blp:64
+msgctxt "shortcut window"
+msgid "Export Mask"
 msgstr ""
 
 #: src/settings/settings.blp:11
@@ -510,43 +189,43 @@ msgstr ""
 msgid "Manually Select Folder Color"
 msgstr ""
 
-#: src/settings/settings.blp:34 src/window.blp:445
+#: src/settings/settings.blp:34 src/window.blp:446 src/window.blp:524
 msgid "Blue"
 msgstr ""
 
-#: src/settings/settings.blp:35 src/window.blp:451
+#: src/settings/settings.blp:35 src/window.blp:452 src/window.blp:530
 msgid "Teal"
 msgstr ""
 
-#: src/settings/settings.blp:36 src/window.blp:457
+#: src/settings/settings.blp:36 src/window.blp:458 src/window.blp:536
 msgid "Green"
 msgstr ""
 
-#: src/settings/settings.blp:37 src/window.blp:463
+#: src/settings/settings.blp:37 src/window.blp:464 src/window.blp:542
 msgid "Yellow"
 msgstr ""
 
-#: src/settings/settings.blp:38 src/window.blp:469
+#: src/settings/settings.blp:38 src/window.blp:470 src/window.blp:548
 msgid "Orange"
 msgstr ""
 
-#: src/settings/settings.blp:39 src/window.blp:475
+#: src/settings/settings.blp:39 src/window.blp:476 src/window.blp:554
 msgid "Red"
 msgstr ""
 
-#: src/settings/settings.blp:40 src/window.blp:481
+#: src/settings/settings.blp:40 src/window.blp:482 src/window.blp:560
 msgid "Pink"
 msgstr ""
 
-#: src/settings/settings.blp:41 src/window.blp:487
+#: src/settings/settings.blp:41 src/window.blp:488 src/window.blp:566
 msgid "Purple"
 msgstr ""
 
-#: src/settings/settings.blp:42 src/window.blp:493
+#: src/settings/settings.blp:42 src/window.blp:494 src/window.blp:572
 msgid "Slate"
 msgstr ""
 
-#: src/settings/settings.blp:43 src/window.blp:499
+#: src/settings/settings.blp:43 src/window.blp:500 src/window.blp:578
 msgid "Custom"
 msgstr ""
 
@@ -554,67 +233,79 @@ msgstr ""
 msgid "Primary Color"
 msgstr ""
 
-#: src/settings/settings.blp:72
+#: src/settings/settings.blp:71
 msgid "Secondary Color"
 msgstr ""
 
-#: src/settings/settings.blp:89
+#: src/settings/settings.blp:88
 msgid "Use Custom Bottom Image"
 msgstr ""
 
-#: src/settings/settings.blp:95
+#: src/settings/settings.blp:94
 msgid "use custom bottom image"
 msgstr ""
 
-#: src/settings/settings.blp:101
+#: src/settings/settings.blp:100
 msgid "Current Image"
 msgstr ""
 
-#: src/settings/settings.blp:109
+#: src/settings/settings.blp:108
 msgid "Select Image"
 msgstr ""
 
-#: src/settings/settings.blp:117
+#: src/settings/settings.blp:116
+msgid "Properties"
+msgstr ""
+
+#: src/settings/settings.blp:120
+msgid "Mask overflow*"
+msgstr ""
+
+#: src/settings/settings.blp:121
+msgid "Remove parts of the top image that overflow the bottom image"
+msgstr ""
+
+#: src/settings/settings.blp:127
 msgid "Drag and Drop"
 msgstr ""
 
-#: src/settings/settings.blp:122
+#: src/settings/settings.blp:131
 msgid "Allow Drop During Drag*"
 msgstr ""
 
-#: src/settings/settings.blp:123
+#: src/settings/settings.blp:132
 msgid "Allow dropping the image back as a layer when dragging"
 msgstr ""
 
-#: src/settings/settings.blp:128
+#: src/settings/settings.blp:137
 msgid "Default Drag-and-Drop Action*"
 msgstr ""
 
-#: src/settings/settings.blp:129
+#: src/settings/settings.blp:138
 msgid "Set a default layer when dropping an image"
 msgstr ""
 
-#: src/settings/settings.blp:136
+#: src/settings/settings.blp:145
 msgid "Use a default drag and drop action"
 msgstr ""
 
-#: src/settings/settings.blp:143
+#: src/settings/settings.blp:152
 msgid "Always select top layer"
 msgstr ""
 
-#: src/settings/settings.blp:153
+#: src/settings/settings.blp:162
 msgid "Always select bottom layer"
 msgstr ""
 
-#: src/settings/settings.blp:166
+#: src/settings/settings.blp:174
 msgid "Regeneration"
 msgstr ""
 
-#: src/settings/settings.blp:170
+#: src/settings/settings.blp:177
 msgid "What is Regeneration?"
 msgstr ""
 
-#: src/settings/settings.blp:184
+#: src/settings/settings.blp:192
 msgid ""
 "Iconic is able to <i>Regenerate</i> compatible icons. Regeneration is the "
 "ability to change the color of a folder image after it has already been "
@@ -625,119 +316,95 @@ msgid ""
 "likely required to log out and in to see the changes"
 msgstr ""
 
-#: src/settings/settings.blp:192
+#: src/settings/settings.blp:201
 msgid "Enable Regeneration"
 msgstr ""
 
-#: src/settings/settings.blp:193
+#: src/settings/settings.blp:202
 msgid ""
 "Enable the automatic regenerating of folders when a new system accent color "
 "is selected"
 msgstr ""
 
-#: src/settings/settings.blp:197
+#: src/settings/settings.blp:206
 msgid "Automatic Genereration"
 msgstr ""
 
-#: src/settings/settings.blp:198
+#: src/settings/settings.blp:207
 msgid "Automatically regenerate the Icons when the system accent color changes"
 msgstr ""
 
-#: src/settings/settings.blp:204 src/settings/settings.blp:212
-msgid "Loose Regeneration"
+#: src/settings/settings.blp:220
+msgid "Loose Regeneration*"
 msgstr ""
 
-#: src/settings/settings.blp:205 src/settings/settings.blp:213
+#: src/settings/settings.blp:221
 msgid ""
-"Allow regeneration of folder images with \"Use system folder color\" disabled"
-msgstr ""
-
-#: src/settings/settings.blp:225
-msgid "Ignore Custom Folders*"
-msgstr ""
-
-#: src/settings/settings.blp:226
-msgid "Don't regenerate folder images with custom folder colors"
+"Allow regeneration of folder images with “Use system folder color” disabled"
 msgstr ""
 
 #: src/settings/settings.blp:233
-msgid "Advanced"
+msgid "Ignore Custom Folders*"
 msgstr ""
 
-#: src/settings/settings.blp:236
+#: src/settings/settings.blp:234
+msgid "Don’t regenerate folder images with custom folder colors"
+msgstr ""
+
+#: src/settings/settings.blp:243
 msgid "Enable advanced settings"
 msgstr ""
 
-#: src/settings/settings.blp:237
+#: src/settings/settings.blp:244
 msgid "Items marked with an '*' after enabling this switch are advanced"
 msgstr ""
 
-#: src/settings/settings.blp:242
-msgid "You can see these options because you have enabled the Devel profile"
-msgstr ""
-
-#: src/settings/settings.blp:253
-msgid "Select size of SVG images"
-msgstr ""
-
-#: src/settings/settings.blp:254
-msgid ""
-"SVG images will by default be converted to a 1024x1024 image. You can adjust "
-"that here"
-msgstr ""
-
-#: src/settings/settings.blp:266
-msgid "Select size of Thumbnail images"
-msgstr ""
-
-#: src/settings/settings.blp:267
-msgid ""
-"Thumbnail images will by default be converted to a 255x255 image. You can "
-"adjust that here"
-msgstr ""
-
-#: src/window.blp:11
+#: src/window.blp:23
 msgid "Drop Here to Open"
 msgstr ""
 
 #. visible: bind regeneration_revealer.reveal-child;
-#: src/window.blp:41 src/window.blp:156
+#: src/window.blp:53 src/window.blp:168
 msgid "Regenerating icons…"
 msgstr ""
 
-#: src/window.blp:48 src/window.blp:163
+#: src/window.blp:60 src/window.blp:175
 msgid "Menu"
 msgstr ""
 
-#: src/window.blp:76
+#: src/window.blp:87
 msgid "Folder Icon Creator"
 msgstr ""
 
-#: src/window.blp:77
+#: src/window.blp:88
 msgid "Click or Drag to Open Image"
 msgstr ""
 
-#: src/window.blp:88
+#: src/window.blp:99
 msgid "_Open Image"
 msgstr ""
 
-#: src/window.blp:101
+#: src/window.blp:112
 msgid "_Show Bottom Layer"
 msgstr ""
 
-#: src/window.blp:127 src/windows/alert_dialogs.rs:85
+#: src/window.blp:138 src/windows/alert_dialogs.rs:85
 msgid "Save"
 msgstr ""
 
-#: src/window.blp:198
+#: src/window.blp:142
+msgid "Save the current image to disk"
+msgstr ""
+
+#: src/window.blp:210
 msgid "y-position of top image"
 msgstr ""
 
-#: src/window.blp:239
+#: src/window.blp:245
 msgid "New top image is loading"
 msgstr ""
 
-#: src/window.blp:251
+#: src/window.blp:257
 msgid "x-position of top image"
 msgstr ""
 
@@ -790,11 +457,11 @@ msgid "_Paste Top Icon from Clipboard"
 msgstr ""
 
 #: src/window.blp:416
-msgid "_Open Top Icon"
+msgid "_Select Top Icon"
 msgstr ""
 
 #: src/window.blp:417
-msgid "_Open Bottom Icon"
+msgid "_Select Bottom Icon"
 msgstr ""
 
 #: src/window.blp:421
@@ -817,27 +484,31 @@ msgstr ""
 msgid "_About Iconic"
 msgstr ""
 
-#: src/window.blp:434
+#: src/window.blp:434 src/window.blp:515
 msgid "Change Top Image"
 msgstr ""
 
-#: src/window.blp:438
-msgid "Change Bottom Image"
+#: src/window.blp:435 src/window.blp:516
+msgid "Remove overflow"
 msgstr ""
 
-#: src/window.blp:439
-msgid "Temporarily Change Bottom Image"
+#: src/window.blp:436
+msgid "_Set Custom Mask*"
 msgstr ""
 
-#: src/window.blp:442
+#: src/window.blp:440
+msgid "Temporarily Change Bottom Image*"
+msgstr ""
+
+#: src/window.blp:443 src/window.blp:521
 msgid "Temporarily Change Folder Color"
 msgstr ""
 
-#: src/window.blp:507
-msgid "Reset Temporary Bottom Image"
+#: src/window.blp:508
+msgid "Reset Temporary Bottom Image*"
 msgstr ""
 
-#: src/window.blp:508
+#: src/window.blp:509 src/window.blp:586
 msgid "Reset Image"
 msgstr ""
 
@@ -845,7 +516,7 @@ msgstr ""
 msgid "Preview window of icon, drag from here to start drag operation"
 msgstr ""
 
-#: src/application.rs:184
+#: src/application.rs:189
 msgid ""
 "Iconic allows you to add images onto a folder.\n"
 "You can drag these created images straight into the properties window of the "
@@ -855,11 +526,11 @@ msgid ""
 msgstr ""
 
 #. Translators: This should not be translated, Please enter your credits here instead (format: "Name https://example.com" or "Name <email@example.com>", no quotes)
-#: src/application.rs:190
+#: src/application.rs:195
 msgid "translator-credits"
 msgstr ""
 
-#: src/objects/errors.rs:17 src/settings/settings.rs:452
+#: src/objects/errors.rs:17 src/settings/settings.rs:436
 msgid "Error"
 msgstr ""
 
@@ -868,15 +539,11 @@ msgstr ""
 msgid "OK"
 msgstr ""
 
-#: src/window.rs:244
-msgid "Image reset"
-msgstr ""
-
-#: src/window.rs:596
+#: src/window.rs:480
 msgid "The set bottom icon could not be found, resetting"
 msgstr ""
 
-#: src/window.rs:696
+#: src/window.rs:547
 msgid "Open Document"
 msgstr ""
 
@@ -977,51 +644,47 @@ msgstr ""
 msgid "Wait"
 msgstr ""
 
-#: src/windows/file_handling.rs:159 src/windows/file_handling.rs:164
+#: src/windows/file_handling.rs:167 src/windows/file_handling.rs:172
 msgid "No texture found"
 msgstr ""
 
-#: src/windows/file_handling.rs:273
+#: src/windows/file_handling.rs:281
 msgid "Unsupported file type"
 msgstr ""
 
-#: src/windows/file_handling.rs:312
+#: src/windows/file_handling.rs:320
 msgid "Nothing to save"
 msgstr ""
 
-#: src/windows/file_handling.rs:337
+#: src/windows/file_handling.rs:345
 msgid "Open Folder"
 msgstr ""
 
-#: src/windows/file_handling.rs:339
+#: src/windows/file_handling.rs:347
 msgid "File Saved"
 msgstr ""
 
-#: src/windows/file_handling.rs:353
+#: src/windows/file_handling.rs:361
 msgid "File not saved"
 msgstr ""
 
-#: src/windows/file_handling.rs:465
+#: src/windows/file_handling.rs:474
 msgid "Icon reset"
 msgstr ""
 
-#: src/windows/file_handling.rs:478 src/windows/file_handling.rs:496
-msgid "Nothing selected"
-msgstr ""
-
-#: src/windows/file_handling.rs:538
+#: src/windows/file_handling.rs:547
 msgid "No file or path found, this is probably not your fault."
 msgstr ""
 
-#: src/windows/regeneration.rs:115
+#: src/windows/regeneration.rs:134
 msgid "Nothing to regenerate"
 msgstr ""
 
-#: src/windows/regeneration.rs:120
+#: src/windows/regeneration.rs:139
 msgid "Regenerating icons"
 msgstr ""
 
-#: src/windows/regeneration.rs:176
+#: src/windows/regeneration.rs:195
 msgid ""
 "file failed to regenerate\n"
 "view logs for more information"
@@ -1031,6 +694,6 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/windows/regeneration.rs:186
+#: src/windows/regeneration.rs:205
 msgid "Regeneration sucessful, restart nautilus"
 msgstr ""
