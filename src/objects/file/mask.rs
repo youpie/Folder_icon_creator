@@ -29,6 +29,7 @@ impl super::file::File {
         DynamicImage::ImageRgba8(mask_pixels)
     }
 
+    // Load the mask dynamicimages resized to requested size
     pub(super) fn get_masks(
         main_size: u32,
         thumbnail_size: u32,
@@ -46,7 +47,7 @@ impl super::file::File {
             Self::auto_generate_mask(&image)
         };
         let thumbnail_mask = if thumbnail_size > 0 {
-            Some(image_mask.clone().resize(
+            Some(image_mask.clone().resize_exact(
                 thumbnail_size,
                 thumbnail_size,
                 imageops::FilterType::Nearest,

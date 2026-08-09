@@ -14,7 +14,6 @@ use gtk::GestureLongPress;
 use gtk::gdk;
 use gtk::prelude::PopoverExt;
 use log::debug;
-use resvg::tiny_skia::Mask;
 
 #[gtk::template_callbacks]
 impl IconicWindow {

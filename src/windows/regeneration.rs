@@ -221,6 +221,7 @@ impl IconicWindow {
 
         // Get path and filename of icon saved in datadir
         let file_path = file.path();
+        let filename: String = file.file_name().to_string_lossy().to_string();
 
         let strict_mode_enabled = imp.settings.boolean("strict-regeneration");
         let ignore_custom_colored = imp.settings.boolean("ignore-custom");
@@ -229,29 +230,24 @@ impl IconicWindow {
         // So when regenerating icons, you need the folder which is the same color as the current accent color
         let (bottom_image_file, mask, custom_accent_color, custom_accent_color_hex) =
             match properties.bottom_image_type.clone() {
-                BottomImageType::FolderSystem => (
-                    self.get_bottom_icon_from_accent_color(None, strict_mode_enabled)
-                        .await?,
-                    // TODO No mask
-                    // self.serve_mask(),
-                    self.load_mask(&properties, file_name, bottom_image),
-                    None,
-                    None,
-                ),
-                BottomImageType::Folder(color) if !properties.default || !strict_mode_enabled => (
-                    self.get_bottom_icon_from_accent_color(
-                        Some(color.clone()),
-                        strict_mode_enabled,
-                    )
-                    .await?,
-                    // TODO No maks
-                    None,
-                    Some(color),
-                    None,
-                ),
+                BottomImageType::FolderSystem => {
+                    let bottom_image = self
+                        .get_bottom_icon_from_accent_color(None, strict_mode_enabled)
+                        .await?;
+                    let mask = self.load_mask(&properties, &filename, &bottom_image);
+                    (bottom_image, mask, None, None)
+                }
+                BottomImageType::Folder(color) if !properties.default || !strict_mode_enabled => {
+                    let bottom_image = self
+                        .get_bottom_icon_from_accent_color(Some(color.clone()), strict_mode_enabled)
+                        .await?;
+                    let mask = self.load_mask(&properties, &filename, &bottom_image);
+                    (bottom_image, mask, Some(color), None)
+                }
                 BottomImageType::FolderCustom(foreground, background)
                     if !properties.default || (!strict_mode_enabled || !ignore_custom_colored) =>
                 {
+                    // If ignore custom folders is enabled, it regenerate it, but without any changes
                     if strict_mode_enabled || ignore_custom_colored {
                         let folder_path = self
                             .create_custom_folder_color(&foreground, &background, true)
@@ -265,19 +261,17 @@ impl IconicWindow {
                         .unwrap()?;
                         (
                             image_file.image,
-                            Some(image_file.image_mask),
+                            image_file.image_mask,
                             None,
                             Some(background),
                         )
                     } else {
-                        (
-                            self.get_bottom_icon_from_accent_color(None, strict_mode_enabled)
-                                .await?,
-                            // TODO No mask
-                            None,
-                            None,
-                            Some(background),
-                        )
+                        // If ignore custom folders is disabled, it should regenerate it as a generic folder
+                        let bottom_image = self
+                            .get_bottom_icon_from_accent_color(None, strict_mode_enabled)
+                            .await?;
+                        let mask = self.load_mask(&properties, &filename, &bottom_image);
+                        (bottom_image, mask, None, Some(background))
                     }
                 }
                 _ => return Ok(()),
@@ -323,7 +317,7 @@ impl IconicWindow {
         let generated_image = self
             .generate_image(
                 bottom_image_file,
-                mask.unwrap_or_default(),
+                mask,
                 top_image,
                 imageops::FilterType::Gaussian,
                 properties.x_val,

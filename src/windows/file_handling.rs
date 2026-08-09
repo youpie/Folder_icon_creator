@@ -482,10 +482,7 @@ impl IconicWindow {
             Some(x) => {
                 self.load_top_file(x).await;
             }
-            None => {
-                imp.toast_overlay
-                    .add_toast(adw::Toast::new(&gettext("Nothing selected")));
-            }
+            None => (),
         };
         imp.image_loading_spinner.set_visible(false);
     }
@@ -506,10 +503,7 @@ impl IconicWindow {
                 self.new_iconic_file_creation(Some(x), None, size, thumbnail_size, false)
                     .await;
             }
-            None => {
-                imp.toast_overlay
-                    .add_toast(adw::Toast::new(&gettext("Nothing selected")));
-            }
+            None => (),
         };
     }
 
