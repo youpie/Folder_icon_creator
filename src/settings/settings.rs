@@ -10,6 +10,7 @@ use adw::subclass::prelude::AdwDialogImpl;
 use gdk4::RGBA;
 use gettextrs::*;
 use gio::AppInfo;
+use gio::glib::user_cache_dir;
 use gtk::glib;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
@@ -21,6 +22,8 @@ use std::{env, fs, path};
 use crate::IconicWindow;
 
 mod imp {
+    use std::cell::Cell;
+
     use crate::objects::properties::CustomRGB;
 
     use super::*;
@@ -58,6 +61,8 @@ mod imp {
         #[template_child]
         pub ignore_custom: TemplateChild<adw::SwitchRow>,
         #[template_child]
+        pub strict_button: TemplateChild<adw::SwitchRow>,
+        #[template_child]
         pub strict_regeneration: TemplateChild<gtk::Switch>,
         #[template_child]
         pub automatic_regeneration: TemplateChild<adw::SwitchRow>,
@@ -77,7 +82,10 @@ mod imp {
         pub preferences_page: TemplateChild<adw::PreferencesPage>,
         #[template_child]
         pub enable_advanced: TemplateChild<adw::SwitchRow>,
+        #[template_child]
+        pub enable_overflow: TemplateChild<adw::SwitchRow>,
         pub settings: gio::Settings,
+        pub initialized: Cell<bool>,
     }
 
     #[glib::object_subclass]
@@ -112,6 +120,9 @@ mod imp {
                 select_default_bottom: TemplateChild::default(),
                 preferences_page: TemplateChild::default(),
                 enable_advanced: TemplateChild::default(),
+                enable_overflow: TemplateChild::default(),
+                strict_button: TemplateChild::default(),
+                initialized: Cell::new(false),
             }
         }
 
@@ -151,7 +162,9 @@ mod imp {
                 #[weak]
                 win,
                 move |_| {
-                    scroll_to_bottom(&win.preferences_page);
+                    if win.initialized.get() {
+                        scroll_to_bottom(&win.preferences_page);
+                    }
                 }
             ));
         }
@@ -219,6 +232,7 @@ impl PreferencesDialog {
         win.disable_color_dropdown(true);
         win.setup_settings();
         win.show_color_options();
+        imp.initialized.set(true);
         win
     }
 
@@ -248,7 +262,17 @@ impl PreferencesDialog {
             .bind("allow-meta-drop", &*imp.meta_drop_switch, "active")
             .build();
         imp.settings
+            .bind("advanced-settings", &*imp.enable_advanced, "active")
+            .build();
+        imp.settings
+            .bind("mask-enabled", &*imp.enable_overflow, "active")
+            .build();
+        imp.settings
             .bind("default-dnd-activated", &*imp.dnd_switch, "active")
+            .build();
+        imp.settings
+            .bind("strict-regeneration", &*imp.strict_button, "active")
+            .invert_boolean()
             .build();
         imp.settings
             .bind("strict-regeneration", &*imp.strict_regeneration, "active")
@@ -460,7 +484,7 @@ impl PreferencesDialog {
     pub async fn open_image_cache(&self, _button: adw::ButtonRow) {
         let file = gio::File::for_path(format!(
             "{}/top_images/",
-            IconicWindow::get_cache_path().to_str().unwrap()
+            user_cache_dir().to_str().unwrap()
         ))
         .uri();
         if let Err(e) = AppInfo::launch_default_for_uri(&file, None::<&gio::AppLaunchContext>) {

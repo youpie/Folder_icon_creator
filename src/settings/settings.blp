@@ -68,7 +68,6 @@ template $PreferencesDialog: Adw.PreferencesDialog {
         }
 
         Adw.ActionRow secondary_color_row {
-          visible: true;
           title: _("Secondary Color");
           activatable-widget: secondary_folder_color;
 
@@ -114,49 +113,58 @@ template $PreferencesDialog: Adw.PreferencesDialog {
     }
 
     Adw.PreferencesGroup {
+      title: _("Properties");
+      visible: bind enable_advanced.active;
+
+      Adw.SwitchRow enable_overflow {
+        title: _("Mask overflow*");
+        subtitle: _("Remove parts of the top image that overflow the bottom image");
+        visible: bind enable_advanced.active;
+      }
+    }
+
+    Adw.PreferencesGroup {
       title: _("Drag and Drop");
       visible: bind enable_advanced.active;
 
-      Adw.PreferencesGroup {
-        Adw.SwitchRow meta_drop_switch {
-          title: _("Allow Drop During Drag*");
-          subtitle: _("Allow dropping the image back as a layer when dragging");
-          visible: bind enable_advanced.active;
+      Adw.SwitchRow meta_drop_switch {
+        title: _("Allow Drop During Drag*");
+        subtitle: _("Allow dropping the image back as a layer when dragging");
+        visible: bind enable_advanced.active;
+      }
+
+      Adw.ExpanderRow default_dnd {
+        title: _("Default Drag-and-Drop Action*");
+        subtitle: _("Set a default layer when dropping an image");
+        expanded: bind dnd_switch.active;
+        enable-expansion: bind dnd_switch.active;
+        visible: bind enable_advanced.active;
+
+        [suffix]
+        Switch dnd_switch {
+          tooltip-text: _("Use a default drag and drop action");
+          valign: center;
+          active: false;
+          action-name: "app.dnd_switch";
         }
 
-        Adw.ExpanderRow default_dnd {
-          title: _("Default Drag-and-Drop Action*");
-          subtitle: _("Set a default layer when dropping an image");
-          expanded: bind dnd_switch.active;
-          enable-expansion: bind dnd_switch.active;
-          visible: bind enable_advanced.active;
+        Adw.ActionRow {
+          title: _("Always select top layer");
+          activatable-widget: radio_button_top;
 
-          [suffix]
-          Switch dnd_switch {
-            tooltip-text: _("Use a default drag and drop action");
+          Gtk.CheckButton radio_button_top {
+            active: true;
             valign: center;
-            active: false;
-            action-name: "app.dnd_switch";
           }
+        }
 
-          Adw.ActionRow {
-            title: _("Always select top layer");
-            activatable-widget: radio_button_top;
+        Adw.ActionRow {
+          title: _("Always select bottom layer");
+          activatable-widget: radio_button_bottom;
 
-            Gtk.CheckButton radio_button_top {
-              active: true;
-              valign: center;
-            }
-          }
-
-          Adw.ActionRow {
-            title: _("Always select bottom layer");
-            activatable-widget: radio_button_bottom;
-
-            Gtk.CheckButton radio_button_bottom {
-              group: radio_button_top;
-              valign: center;
-            }
+          Gtk.CheckButton radio_button_bottom {
+            group: radio_button_top;
+            valign: center;
           }
         }
       }
@@ -165,66 +173,66 @@ template $PreferencesDialog: Adw.PreferencesDialog {
     Adw.PreferencesGroup {
       title: _("Regeneration");
 
-      Adw.PreferencesGroup {
-        Adw.ExpanderRow {
-          title: _("What is Regeneration?");
+      Adw.ExpanderRow {
+        title: _("What is Regeneration?");
+        activatable: false;
+
+        ListBoxRow {
           activatable: false;
 
-          ListBoxRow {
-            activatable: false;
-
-            [child]
-            Label {
-              wrap: true;
-              selectable: true;
-              valign: start;
-              use-markup: true;
-              margin-start: 10;
-              margin-end: 10;
-              label: _("Iconic is able to <i>Regenerate</i> compatible icons. Regeneration is the ability to change the color of a folder image after it has already been created when the system accent color has been changed.\
+          [child]
+          Label {
+            wrap: true;
+            selectable: true;
+            valign: start;
+            use-markup: true;
+            margin-start: 10;
+            margin-end: 10;
+            label: _(
+              "Iconic is able to <i>Regenerate</i> compatible icons. Regeneration is the ability to change the color of a folder image after it has already been created when the system accent color has been changed.\
 This is useful in combination with <a href=\"https://github.com/dpejoh/Adwaita-colors\"><b>Adwaita Colors</b></a> which automatically changes the color of all folders based on the current accent color.\
-After regeneration, it is likely required to log out and in to see the changes");
-            }
+After regeneration, it is likely required to log out and in to see the changes"
+            );
           }
         }
+      }
 
-        Adw.SwitchRow store_top_images {
-          title: _("Enable Regeneration");
-          subtitle: _("Enable the automatic regenerating of folders when a new system accent color is selected");
+      Adw.SwitchRow store_top_images {
+        title: _("Enable Regeneration");
+        subtitle: _("Enable the automatic regenerating of folders when a new system accent color is selected");
+      }
+
+      Adw.SwitchRow automatic_regeneration {
+        title: _("Automatic Genereration");
+        subtitle: _("Automatically regenerate the Icons when the system accent color changes");
+        sensitive: bind store_top_images.active;
+      }
+
+      Adw.SwitchRow strict_button {
+        visible: bind enable_advanced.active inverted;
+        title: _("Loose Regeneration");
+        subtitle: _("Allow regeneration of folder images with “Use system folder color” disabled");
+        sensitive: bind store_top_images.active;
+        active: bind strict_regeneration.active bidirectional;
+      }
+
+      Adw.ExpanderRow strict_expander {
+        visible: bind enable_advanced.active;
+        title: _("Loose Regeneration*");
+        subtitle: _("Allow regeneration of folder images with “Use system folder color” disabled");
+        expanded: false;
+        enable-expansion: bind strict_regeneration.active;
+
+        [suffix]
+        Switch strict_regeneration {
+          valign: center;
+          active: false;
+          action-name: "app.strict_regeneration";
         }
 
-        Adw.SwitchRow automatic_regeneration {
-          title: _("Automatic Genereration");
-          subtitle: _("Automatically regenerate the Icons when the system accent color changes");
-          sensitive: bind store_top_images.active;
-        }
-
-        Adw.SwitchRow strict_button {
-          visible: bind enable_advanced.active inverted;
-          title: _("Loose Regeneration");
-          subtitle: _("Allow regeneration of folder images with \"Use system folder color\" disabled");
-          sensitive: bind store_top_images.active;
-          active: bind strict_regeneration.active bidirectional;
-        }
-
-        Adw.ExpanderRow strict_expander {
-          visible: bind enable_advanced.active;
-          title: _("Loose Regeneration");
-          subtitle: _("Allow regeneration of folder images with \"Use system folder color\" disabled");
-          expanded: false;
-          enable-expansion: bind strict_regeneration.active;
-
-          [suffix]
-          Switch strict_regeneration {
-            valign: center;
-            active: false;
-            action-name: "app.strict_regeneration";
-          }
-
-          Adw.SwitchRow ignore_custom {
-            title: _("Ignore Custom Folders*");
-            subtitle: _("Don't regenerate folder images with custom folder colors");
-          }
+        Adw.SwitchRow ignore_custom {
+          title: _("Ignore Custom Folders*");
+          subtitle: _("Don’t regenerate folder images with custom folder colors");
         }
       }
     }

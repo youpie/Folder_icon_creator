@@ -1,17 +1,18 @@
 use adw::prelude::FileExt;
-use gio::{Cancellable, FileQueryInfoFlags};
+use gio::{Cancellable, FileInfo, FileQueryInfoFlags};
 use gtk::gio;
+use image::imageops::FilterType::Nearest;
 use image::*;
 use log::*;
 use resvg::tiny_skia::Pixmap;
 use resvg::usvg::{Options, Transform, Tree};
-use std::ffi::OsStr;
 use std::fs;
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::path::PathBuf;
 
 use crate::GenResult;
 use crate::objects::errors::IntoResult;
+use crate::objects::file::mask::MaskOption;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct File {
@@ -19,9 +20,11 @@ pub struct File {
     pub path: PathBuf,
     pub filename: String,
     pub extension: String,
-    pub dynamic_image: DynamicImage,
-    pub dynamic_image_resized: bool,
+    pub image: DynamicImage,
+    pub image_mask: Option<DynamicImage>,
+    pub image_resized: bool,
     pub thumbnail: DynamicImage,
+    pub thumbnail_mask: Option<DynamicImage>,
     pub hash: u64,
 }
 
@@ -30,82 +33,88 @@ impl File {
         self.path.clone().into_os_string().into_string().unwrap()
     }
 
-    pub fn new(file: gio::File, size: u32, thumbnail_size: u32) -> GenResult<Self> {
-        let temp_path = file.path().into_reason_result("Can't get file path")?;
-        let file_info =
-            file.query_info("standard::", FileQueryInfoFlags::NONE, Cancellable::NONE)?;
-        let file_name_pathbuf = PathBuf::from(file_info.name().into_os_string());
-        let file_name = file_name_pathbuf
+    pub fn new(
+        image_file: gio::File,
+        size: u32,
+        thumbnail_size: u32,
+        mask_path: MaskOption,
+    ) -> GenResult<Self> {
+        let (mut image, file_info) = Self::load_file(&image_file, size)?;
+        let image_path = image_file
+            .path()
+            .into_reason_result("Can't get file path")?;
+        let filename = PathBuf::from(file_info.name().into_os_string());
+        let file_name = filename
             .file_stem()
-            .unwrap_or(OsStr::new("unkwnown"))
-            .to_str()
-            .into_result()?
-            .to_string();
-        let file_extension = file_name_pathbuf
+            .map(|stem| stem.to_string_lossy().to_string())
+            .unwrap_or("Unknown".to_owned());
+        let file_extension = filename
             .extension()
-            .unwrap_or(OsStr::new("png"))
-            .to_str()
-            .into_result()?
-            .to_string();
-        let mime_type = file_info.content_type();
-        debug!("Mime type: {:?}", mime_type);
-        let mut dynamic_image = if mime_type == Some("image/svg+xml".into()) {
-            let path = temp_path.as_os_str().to_str().into_result()?;
-            Self::load_svg(path, size)?
-        } else {
-            match image::open(temp_path.clone().into_os_string()) {
-                Err(_) => {
-                    let image = ImageReader::open(temp_path.clone().into_os_string())?
-                        .with_guessed_format()?;
-                    image.decode()?
-                }
-                Ok(x) => x,
-            }
-        };
-        let hash = Self::create_hash(&dynamic_image);
+            .map(|extension| extension.to_string_lossy().to_string())
+            .unwrap_or("png".to_owned());
+
+        let hash = Self::create_hash(&image);
         debug!("hash of created file: {}", hash);
-        let mut dynamic_image_resized = false;
+
         // Resize the image if the file is larger than the set size
         // Reduces cache file size, but will take even longer to load image
-        if dynamic_image.width() > size as u32 || dynamic_image.height() > size as u32 {
-            dynamic_image_resized = true;
-            dynamic_image =
-                dynamic_image.resize(size as u32, size as u32, imageops::FilterType::Nearest);
-        }
+        let image_resized = if image.width() > size as u32 || image.height() > size as u32 {
+            image = image.resize(size as u32, size as u32, imageops::FilterType::Nearest);
+            true
+        } else {
+            false
+        };
 
-        let mut thumbnail = DynamicImage::new_rgb8(0, 0);
-        if thumbnail_size > 0 {
-            thumbnail = if file_extension == "svg" {
-                let path = &temp_path.as_os_str().to_str().unwrap();
-                Self::load_svg(path, thumbnail_size)?
-            } else {
-                dynamic_image.clone().resize(
-                    thumbnail_size as u32,
-                    thumbnail_size as u32,
-                    imageops::FilterType::Nearest,
-                )
-            };
-        }
+        // Thumbnail logic
+        let thumbnail = if thumbnail_size > 0 {
+            image.resize(
+                thumbnail_size,
+                thumbnail_size,
+                imageops::FilterType::CatmullRom,
+            )
+        } else {
+            DynamicImage::new_rgba8(0, 0)
+        };
+
+        // Mask logic
+        let (image_mask, thumbnail_mask) =
+            Self::get_masks(size, thumbnail_size, &image, &mask_path)?;
+
         Ok(Self {
-            files: Some(file),
-            path: temp_path.into(),
-            extension: mime_type.into_result()?.into(),
+            files: Some(image_file),
+            path: image_path,
+            extension: file_extension,
             filename: file_name,
-            dynamic_image,
-            dynamic_image_resized,
+            image,
+            image_mask,
+            image_resized,
             thumbnail,
+            thumbnail_mask,
             hash,
         })
     }
 
-    pub fn from_path_string(path: &str, size: u32, thumbnail_size: u32) -> GenResult<Self> {
-        let file = gio::File::for_path(PathBuf::from(path).as_path());
-        Self::new(file, size, thumbnail_size)
+    pub fn load_file(file: &gio::File, size: u32) -> GenResult<(DynamicImage, FileInfo)> {
+        let path = file.path().into_reason_result("Can't get file path")?;
+        let file_info =
+            file.query_info("standard::", FileQueryInfoFlags::NONE, Cancellable::NONE)?;
+        let mime_type = file_info.content_type();
+        let image = if mime_type == Some("image/svg+xml".into()) {
+            Self::load_svg(path, size)?
+        } else {
+            ImageReader::open(path)?.with_guessed_format()?.decode()?
+        };
+        Ok((image, file_info))
     }
 
-    pub fn from_path(path: PathBuf, size: u32, thumbnail_size: u32) -> GenResult<Self> {
+    pub fn from_path(
+        path: impl AsRef<std::path::Path>,
+        size: u32,
+        thumbnail_size: u32,
+        mask_path: MaskOption,
+    ) -> GenResult<Self> {
         let file = gio::File::for_path(path);
-        Self::new(file, size, thumbnail_size)
+        Self::new(file, size, thumbnail_size, mask_path)
     }
 
     pub fn from_image(
@@ -121,28 +130,35 @@ impl File {
             imageops::FilterType::Nearest,
         );
         let hash = Self::create_hash(&image);
-        let mut dynamic_image_resized = false;
+        let mut image_resized = false;
         // Resize the image if the file is larger than the set size
         // Reduces cache file size, but will take even longer to load image
         if let Some(size) = max_size {
             if image.width() > size || image.height() > size {
-                dynamic_image_resized = true;
+                image_resized = true;
                 image = image.resize(size, size, imageops::FilterType::Nearest);
             }
         }
+
+        let image_mask = Self::auto_generate_mask(&image);
+        let thumbnail_mask = Some(image_mask.resize(thumbnail_size, thumbnail_size, Nearest));
+        let image_mask = Some(image_mask);
+
         Self {
             files: None,
             path: "".into(),
             extension: ".dynamic".to_string(),
             filename: filename.to_string(),
             hash,
-            dynamic_image: image,
+            image,
+            image_mask,
             thumbnail,
-            dynamic_image_resized,
+            thumbnail_mask,
+            image_resized,
         }
     }
 
-    pub fn load_svg(path: &str, size: u32) -> GenResult<DynamicImage> {
+    fn load_svg(path: PathBuf, size: u32) -> GenResult<DynamicImage> {
         // Load the SVG file content
         let svg_data = match fs::read(path) {
             Ok(x) => x,

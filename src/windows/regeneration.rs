@@ -1,6 +1,6 @@
 use crate::GenResult;
 use crate::objects::errors::IntoResult;
-use crate::objects::file::File;
+use crate::objects::file::file::File;
 use crate::objects::properties::{BottomImageType, FileProperties, PropertiesSource};
 use crate::{IconicWindow, objects::errors::show_error_popup};
 
@@ -8,10 +8,11 @@ use crate::objects::properties::CustomRGB;
 use adw::TimedAnimation;
 use adw::{prelude::*, subclass::prelude::*};
 use gettextrs::{gettext, ngettext};
-use gio::glib;
+use gio::glib::{self, user_cache_dir, user_data_dir};
 use gio::prelude::SettingsExt;
 use gtk::gdk::RGBA;
 use gtk::gio;
+use image::ImageFormat::Png;
 use image::*;
 use log::*;
 use std::fs::{self, DirEntry};
@@ -50,14 +51,14 @@ impl IconicWindow {
             .file_properties
             .borrow()
             .bottom_image_type
-            .is_strict_compatible()
+            .is_regeneration_compatible()
             == None
         {
             info!("Current file does not use a compatible bottom image. no use caching the file");
             return Ok(());
         }
         //create folder inside cache, if it does not yet exist
-        let cache_path = Self::get_cache_path().join("top_images");
+        let cache_path = user_cache_dir().join("top_images");
         if !cache_path.exists() {
             debug!("Top icon cache dir does not yet exist, creating");
             fs::create_dir(&cache_path)?;
@@ -83,7 +84,7 @@ impl IconicWindow {
         let filestream = new_file.open_readwrite(gio::Cancellable::NONE)?;
         let test = filestream.output_stream();
         if let Some(original_file) = &file.files {
-            if !file.dynamic_image_resized {
+            if !file.image_resized {
                 info!("Saving original image to cache");
                 let buffer = original_file.load_bytes(gio::Cancellable::NONE)?;
                 test.write_bytes(&buffer.0, gio::Cancellable::NONE)?;
@@ -91,8 +92,26 @@ impl IconicWindow {
             }
         }
         info!("Saving dynamic image to cache");
-        file.dynamic_image
-            .save_with_format(file_path, ImageFormat::WebP)?;
+        file.image.save_with_format(file_path, ImageFormat::WebP)?;
+
+        Ok(())
+    }
+
+    pub fn store_mask_in_cache(&self, main_filename: &str) -> GenResult<()> {
+        let imp = self.imp();
+
+        if let Some(mask) = imp.custom_mask.borrow().clone() {
+            let cache_path = user_cache_dir().join("mask");
+            if !cache_path.exists() {
+                debug!("mask cache path not found, creating");
+                fs::create_dir(&cache_path)?;
+            }
+            let mask_path = cache_path.clone().join(main_filename.to_owned());
+            debug!("Saving custom mask");
+            mask.save_with_format(mask_path, Png)?;
+        } else {
+            debug!("No custom mask")
+        }
         Ok(())
     }
 
@@ -103,7 +122,7 @@ impl IconicWindow {
         // First set iconic as busy. By getting a Arc reference
         // I doubt this is the best approach, but Hey it works!
         let _iconic_busy = Arc::clone(&imp.app_busy);
-        let data_path = self.get_data_path();
+        let data_path = user_data_dir();
         let mut incompatible_files_n: u32 = 0;
         let compatible_files =
             self.find_regeneratable_icons(data_path, &mut incompatible_files_n)?;
@@ -202,61 +221,74 @@ impl IconicWindow {
 
         // Get path and filename of icon saved in datadir
         let file_path = file.path();
+        let filename: String = file.file_name().to_string_lossy().to_string();
 
-        let strict_mode_enabled = imp.settings.boolean("strict-regeneration");
+        let strict_mode_enabled = imp.settings.boolean("strict-regeneration"); // CAUTION: strict mode is the opposite of how it is displayed in the UI, there it is loose mode
         let ignore_custom_colored = imp.settings.boolean("ignore-custom");
 
         // Icons that are compatible for regeneration are only allowed to use default folder images.
         // So when regenerating icons, you need the folder which is the same color as the current accent color
-        let (bottom_image_file, custom_accent_color, custom_accent_color_hex) = match properties
-            .bottom_image_type
-            .clone()
-        {
-            BottomImageType::FolderSystem => (
-                self.get_bottom_icon_from_accent_color(None, strict_mode_enabled)
-                    .await?,
-                None,
-                None,
-            ),
-            BottomImageType::Folder(color) if !properties.default || !strict_mode_enabled => (
-                self.get_bottom_icon_from_accent_color(Some(color.clone()), strict_mode_enabled)
-                    .await?,
-                Some(color),
-                None,
-            ),
-            BottomImageType::FolderCustom(foreground, background)
-                if !properties.default || (!strict_mode_enabled || !ignore_custom_colored) =>
-            {
-                if strict_mode_enabled || ignore_custom_colored {
-                    let folder_path = self
-                        .create_custom_folder_color(&foreground, &background, true)
-                        .await;
-                    (
-                        gio::spawn_blocking(move || {
-                            File::from_path(folder_path, 1024, 0).map_err(|err| err.to_string())
+        let (bottom_image_file, mask, custom_accent_color, custom_accent_color_hex) =
+            match properties.bottom_image_type.clone() {
+                BottomImageType::FolderSystem => {
+                    let bottom_image = self
+                        .get_bottom_icon_from_accent_color(None, strict_mode_enabled)
+                        .await?;
+                    let mask = self.load_mask(&properties, &filename, &bottom_image);
+                    (bottom_image, mask, None, None)
+                }
+                BottomImageType::Folder(color) if !properties.default || !strict_mode_enabled => {
+                    let bottom_image = self
+                        .get_bottom_icon_from_accent_color(Some(color.clone()), strict_mode_enabled)
+                        .await?;
+                    let mask = self.load_mask(&properties, &filename, &bottom_image);
+                    (bottom_image, mask, Some(color), None)
+                }
+                BottomImageType::FolderCustom(foreground, background)
+                    if !properties.default || (!strict_mode_enabled || !ignore_custom_colored) =>
+                {
+                    // If ignore custom folders is enabled, it regenerate it, but without any changes in case it was previously regenerated
+                    if strict_mode_enabled || ignore_custom_colored {
+                        let folder_path = self
+                            .create_custom_folder_color(&foreground, &background, true)
+                            .await;
+                        let mask_path = self.get_mask_path(None);
+                        let image_file = gio::spawn_blocking(move || {
+                            File::from_path(folder_path, 1024, 0, mask_path)
+                                .map_err(|err| err.to_string())
                         })
                         .await
-                        .unwrap()?
-                        .dynamic_image,
-                        None,
-                        Some(background),
-                    )
-                } else {
-                    (
-                        self.get_bottom_icon_from_accent_color(None, strict_mode_enabled)
-                            .await?,
-                        None,
-                        Some(background),
-                    )
+                        .unwrap()?;
+
+                        (
+                            image_file.image,
+                            image_file.image_mask,
+                            None,
+                            Some(background),
+                        )
+                    } else {
+                        // If ignore custom folders is disabled, it should regenerate it as a generic folder
+                        let bottom_image = self
+                            .get_bottom_icon_from_accent_color(None, strict_mode_enabled)
+                            .await?;
+                        let mask = self.load_mask(&properties, &filename, &bottom_image);
+
+                        let custom_hex_color = if properties.monochrome_default {
+                            None
+                        } else {
+                            Some(background)
+                        };
+
+                        (bottom_image, mask, None, custom_hex_color)
+                    }
                 }
-            }
-            _ => return Ok(()),
-        };
+                _ => return Ok(()),
+            };
         info!("Generating image");
 
         // If strict mode is disabled and the image is not regenerated during strict mode. And the image is regenerated, is has te be regenerated to mark it as no longer default
         properties.default = if !strict_mode_enabled
-            && properties.bottom_image_type.is_strict_compatible() == Some(false)
+            && properties.bottom_image_type.is_regeneration_compatible() == Some(false)
         {
             false
         } else {
@@ -265,19 +297,20 @@ impl IconicWindow {
 
         // Create the path where the top image of this file is located
         // The top image has the same name as the hash of that image
-        let mut top_image_path = Self::get_cache_path().join("top_images");
+        let mut top_image_path = user_cache_dir().join("top_images");
         top_image_path.push(
             properties
                 .top_image_hash
                 .into_reason_result("Getting top image hash")?
                 .to_string(),
         );
+        let mask_path = self.get_mask_path(None);
         let top_image_file = gio::spawn_blocking(move || {
-            File::from_path(top_image_path, 1024, 0).map_err(|err| err.to_string())
+            File::from_path(top_image_path, 1024, 0, mask_path).map_err(|err| err.to_string())
         })
         .await
         .unwrap()?
-        .dynamic_image;
+        .image;
         // Create the top image
         let top_image = self.set_correct_monochrome_values_based_on_image_properties(
             &properties,
@@ -288,9 +321,11 @@ impl IconicWindow {
         )?;
 
         // Using the generic generate_image function. The icon can faithfully be recreated
+        // TODO mask is still not applied from everywhere
         let generated_image = self
             .generate_image(
                 bottom_image_file,
+                mask,
                 top_image,
                 imageops::FilterType::Gaussian,
                 properties.x_val,
@@ -329,16 +364,14 @@ impl IconicWindow {
 
         // Icons that are compatible for regeneration are only allowed to use default folder images.
         // So when regenerating icons, you need the folder which is the same color as the current accent color
-        let bottom_image_path = PathBuf::from(format!(
-            "/app/share/Iconic/folders/folder_{}.svg",
-            &accent_color
-        ));
+        let bottom_image_path = self.get_built_in_bottom_icon_path(&accent_color);
+        let mask_path = self.get_mask_path(None);
         Ok(gio::spawn_blocking(move || {
-            File::from_path(bottom_image_path, 1024, 0).map_err(|err| err.to_string())
+            File::from_path(bottom_image_path, 1024, 0, mask_path).map_err(|err| err.to_string())
         })
         .await
         .unwrap()?
-        .dynamic_image)
+        .image)
     }
 
     // Search in the list of stored icons to see which ones are valid for regeneration
@@ -347,7 +380,7 @@ impl IconicWindow {
         dir: PathBuf,
         incompatible_files: &mut u32,
     ) -> GenResult<Vec<(FileProperties, fs::DirEntry, PropertiesSource)>> {
-        let top_image_path = Self::get_cache_path().join("top_images");
+        let top_image_path = user_cache_dir().join("top_images");
         let mut regeneratable: Vec<(FileProperties, fs::DirEntry, PropertiesSource)> = vec![];
         // Walk the directory and loop over every file
         let files: fs::ReadDir = fs::read_dir(&dir)?;
@@ -372,7 +405,7 @@ impl IconicWindow {
             if properties
                 .0
                 .bottom_image_type
-                .is_strict_compatible()
+                .is_regeneration_compatible()
                 .is_none()
             {
                 *incompatible_files += 1;
@@ -413,7 +446,7 @@ impl IconicWindow {
                 properties.monochrome_color.unwrap_or_default().2 as f32 / 255.0,
                 1.0,
             ),
-            true if rgb_string_color.is_some() && strict => {
+            true if rgb_string_color.is_some() => {
                 RGBA::from_hex(rgb_string_color.unwrap_or_default())
             }
             true => self.current_accent_rgba(if strict { accent_color } else { None })?,
@@ -436,7 +469,7 @@ impl IconicWindow {
             None => self.get_accent_color(),
         };
         Ok(imp
-            .default_color
+            .default_colors
             .borrow()
             .get(&accent_color)
             .into_result()?

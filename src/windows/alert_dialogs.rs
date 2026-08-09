@@ -151,7 +151,7 @@ impl IconicWindow {
                 .file_properties
                 .borrow()
                 .bottom_image_type
-                .is_strict_compatible()
+                .is_regeneration_compatible()
                 == Some(true)
         {
             const RESPONSE_OK: &str = "OK";

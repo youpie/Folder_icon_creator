@@ -19,7 +19,7 @@
  */
 
 use crate::IconicWindow;
-use crate::config::{APP_ICON, VERSION};
+use crate::config::{APP_ICON, PROFILE, VERSION};
 use crate::glib::WeakRef;
 use crate::settings::settings::PreferencesDialog;
 use adw::prelude::{AdwApplicationWindowExt, AdwDialogExt};
@@ -132,9 +132,14 @@ impl IconicApplication {
         self.set_accels_for_action("app.preferences", &["<primary>comma"]);
         self.set_accels_for_action("app.select_folder", &["<primary><shift>o"]);
         self.set_accels_for_action("app.paste", &["<primary>v"]);
+        self.set_accels_for_action("app.advanced", &["<primary>a"]);
         self.set_accels_for_action("app.regenerate", &["<primary>r"]);
         self.set_accels_for_action("app.shortcuts", &["<primary>question"]);
         self.set_accels_for_action("app.reset", &["r"]);
+        self.set_accels_for_action("app.debug_mask", &["<primary>m"]);
+        if PROFILE == "Devel" {
+            self.set_accels_for_action("app.debug", &["a"]);
+        }
     }
 
     fn show_preferences_dialog(&self) {
@@ -192,7 +197,7 @@ If you like this app, feel free to donate, I would really appreciate it!",
             .issue_url("https://github.com/youpie/Iconic/issues")
             .website("https://github.com/youpie/Iconic")
             .license_type(License::Gpl30)
-            .copyright("© 2025 YoupDeGamerNL")
+            .copyright("© 2026 YoupDeGamerNL\nPlease note that I am proud of you and think you are good enough as you are!!!")
             .build();
         about.add_credit_section(Some("Supporters of iconic"), &["Nido", "Jala015"]);
         about.add_acknowledgement_section(

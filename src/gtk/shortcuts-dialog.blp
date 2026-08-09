@@ -5,7 +5,7 @@ Adw.ShortcutsDialog shortcuts_dialog {
   title: _("Keyboard Shortcuts");
 
   Adw.ShortcutsSection {
-    title: _("Global");
+    title: _("Image");
 
     Adw.ShortcutsItem {
       title: C_("shortcut window", "Save Image");
@@ -23,13 +23,22 @@ Adw.ShortcutsDialog shortcuts_dialog {
     }
 
     Adw.ShortcutsItem {
-      title: C_("shortcut window", "Regenerate Images");
-      action-name: "app.regenerate";
+      title: C_("shortcut window", "Reset Image");
+      action-name: "app.reset";
     }
 
     Adw.ShortcutsItem {
-      title: C_("shortcut window", "Reset Image");
-      action-name: "app.reset";
+      title: C_("shortcut window", "Regenerate Images");
+      action-name: "app.regenerate";
+    }
+  }
+
+  Adw.ShortcutsSection {
+    title: _("General");
+
+    Adw.ShortcutsItem {
+      title: C_("shortcut window", "Enable Advanced");
+      action-name: "app.advanced";
     }
 
     Adw.ShortcutsItem {
@@ -45,6 +54,15 @@ Adw.ShortcutsDialog shortcuts_dialog {
     Adw.ShortcutsItem {
       title: C_("shortcut window", "Quit Iconic");
       action-name: "app.quit";
+    }
+  }
+
+  Adw.ShortcutsSection {
+    title: _("Advanced");
+
+    Adw.ShortcutsItem {
+      title: C_("shortcut window", "Export Mask");
+      action-name: "app.debug_mask";
     }
   }
 }

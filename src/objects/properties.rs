@@ -1,12 +1,13 @@
 use std::{fs::DirEntry, path::PathBuf};
 
 use adw::subclass::prelude::ObjectSubclassIsExt;
-use gio::prelude::SettingsExt;
+use gio::{Settings, prelude::SettingsExt};
 use gtk::gdk;
 use gtk::prelude::RangeExt;
 use hex::FromHex;
 use log::{debug, info};
 use serde::{Deserialize, Serialize};
+use strum::Display;
 use thiserror::Error;
 use xmp_toolkit::{XmpMeta, XmpValue, xmp_ns};
 
@@ -30,16 +31,22 @@ pub struct FileProperties {
     pub monochrome_default: bool,
     pub monochrome_color: Option<(u8, u8, u8)>,
     pub monochrome_threshold_val: u8,
-    pub default: bool, // If the values above are still equal with the generated image. False if for example, the image was regenerated
+    pub mask: MaskType,
+    pub desktop: DesktopEnvironment,
+    /// If the values above are still equal with the generated image. False if for example, the image was regenerated
+    pub default: bool,
 }
 
 impl FileProperties {
+    // File properties are not (yet) automatically copied from the global file properties.
+    // Remember to manually add that link in this function
     pub fn new(
         imp: &IconicWindow,
         top_image_hash: Option<u64>,
         default_monochrome_color: gdk::RGBA,
     ) -> Self {
         let imp = imp.imp();
+        let global_file_properties = imp.file_properties.borrow().clone();
         let x_val = imp.x_scale.value();
         let y_val = imp.y_scale.value();
         let zoom_val = imp.size.value();
@@ -55,7 +62,9 @@ impl FileProperties {
         let monochrome_default = default_monochrome_color == imp.monochrome_color.rgba();
         let monochrome_threshold_val = imp.threshold_scale.value() as u8;
         let monochrome_invert = imp.monochrome_invert.is_active();
-        let bottom_image_type = imp.file_properties.borrow().bottom_image_type.clone();
+        let mask = global_file_properties.mask;
+        let desktop = DesktopEnvironment::default(); // TODO custom desktop logic
+        let bottom_image_type = global_file_properties.bottom_image_type;
         Self {
             bottom_image_type,
             top_image_hash,
@@ -67,6 +76,8 @@ impl FileProperties {
             monochrome_invert,
             monochrome_threshold_val,
             monochrome_toggle,
+            mask,
+            desktop,
             default: true,
         }
     }
@@ -135,6 +146,9 @@ impl FileProperties {
             false => BottomImageType::Unknown,
         };
 
+        let mask = MaskType::Automatic;
+        let desktop = DesktopEnvironment::default();
+
         Ok(Self {
             x_val,
             y_val,
@@ -146,6 +160,8 @@ impl FileProperties {
             monochrome_toggle,
             top_image_hash,
             bottom_image_type,
+            mask,
+            desktop,
             default: true,
         })
     }
@@ -214,6 +230,18 @@ impl FileProperties {
                 .into_reason_result("XMP bottom_image_type")?
                 .value,
         )?;
+        let mask: MaskType = serde_json::from_str(
+            &xmp_data
+                .property(xmp_ns::XMP, "mask")
+                .unwrap_or(XmpValue::new("Automatic".to_owned()))
+                .value,
+        )?;
+        let desktop: DesktopEnvironment = serde_json::from_str(
+            &xmp_data
+                .property(xmp_ns::XMP, "desktop")
+                .unwrap_or(XmpValue::new("Gnome".to_owned()))
+                .value,
+        )?;
         let default: bool = xmp_data
             .property(xmp_ns::XMP, "default")
             .unwrap_or(XmpValue::new("true".to_owned()))
@@ -230,9 +258,19 @@ impl FileProperties {
             monochrome_toggle,
             top_image_hash,
             bottom_image_type,
+            mask,
+            desktop,
             default,
         })
     }
+}
+
+#[derive(Debug, Default, Clone, Copy, Serialize, Deserialize, Display)]
+pub enum DesktopEnvironment {
+    #[default]
+    Gnome,
+    Kde,
+    Plasma,
 }
 
 #[derive(Debug, Error)]
@@ -257,7 +295,7 @@ pub enum BottomImageType {
 impl BottomImageType {
     // Whether this image is able to be regenerate with strict mode enabled
     // By returning none, the image is not at all compatible for regeneration
-    pub fn is_strict_compatible(&self) -> Option<bool> {
+    pub fn is_regeneration_compatible(&self) -> Option<bool> {
         match self {
             Self::FolderSystem => Some(true),
             Self::FolderCustom(_, _) => Some(false),
@@ -267,7 +305,7 @@ impl BottomImageType {
     }
 
     // Get the base bottom image state
-    pub fn get_base(window: &IconicWindow) -> Self {
+    pub fn get_standard(window: &IconicWindow) -> Self {
         let imp = window.imp();
         if imp.settings.boolean("manual-bottom-image-selection") {
             let cache_file_name: String = imp.settings.string("folder-cache-name").into();
@@ -284,6 +322,23 @@ impl BottomImageType {
                 "None" => BottomImageType::FolderSystem,
                 _ => BottomImageType::Folder(set_folder_color),
             }
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub enum MaskType {
+    #[default]
+    Disabled,
+    Automatic,
+    Custom,
+}
+
+impl MaskType {
+    pub fn from_settings(settings: &Settings) -> Self {
+        match settings.boolean("mask-enabled") {
+            false => Self::Disabled,
+            true => Self::Automatic,
         }
     }
 }

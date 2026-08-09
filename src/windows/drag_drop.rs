@@ -2,12 +2,13 @@ use crate::objects::errors::ErrorPopup;
 use crate::{IconicWindow, window};
 use crate::{glib::clone, objects::errors::show_error_popup};
 use adw::subclass::prelude::*;
+use gio::glib::user_data_dir;
 use gio::{glib, prelude::*};
 use gtk::gdk;
 use gtk::prelude::WidgetExt;
 use image::imageops;
 use log::*;
-use random_str::random::{CharBuilder, RandomStringBuilder};
+use uuid::Uuid;
 
 pub fn setup_drag_drop_logic(win: &window::imp::IconicWindow) {
     let obj = win.obj();
@@ -144,7 +145,7 @@ impl IconicWindow {
                     )
                     .await;
                 info!("Done image drag generation");
-                std::fs::rename(
+                _ = std::fs::rename(
                     gio_file_temp.path().unwrap(),
                     gio_file_clone.path().unwrap(),
                 )
@@ -159,16 +160,10 @@ impl IconicWindow {
     }
 
     pub fn create_drag_file(&self, temp: bool) -> gio::File {
-        let data_path = self.get_data_path();
+        let data_path = user_data_dir();
         debug!("data path: {:?}", data_path);
         let mut file_path = data_path.clone();
-        let random_string = RandomStringBuilder::new()
-            .with_length(10)
-            .with_lowercase()
-            .with_numbers()
-            .with_uppercase()
-            .build()
-            .unwrap();
+        let random_string = Uuid::now_v7();
         let generated_file_name = format!(
             "folder-{}{}.png",
             random_string,
@@ -193,6 +188,7 @@ impl IconicWindow {
             "Drag operation cancelled, removing file. Reason: {:?}\n(Currently disabled, treating as a succesful drag)",
             reason
         );
+        // TODO create logic to delete the custom mask
         // match gio_file.delete(None::<&Cancellable>) {
         //     Ok(_) => {
         //         debug!("Deletion succesfull!");
@@ -214,12 +210,20 @@ impl IconicWindow {
             debug!("succesful drag");
             let top_image = imp.top_image_file.lock().unwrap().clone().unwrap(); // Currently blocks
 
+            let main_file = imp.last_drag_n_drop_generated_name.borrow().clone();
+
             match self.store_top_image_in_cache(&top_image) {
                 Err(x) => {
                     show_error_popup(&self, "", true, Some(x));
                 }
                 _ => (),
             };
+
+            if let Some(main_file) = main_file
+                && let Some(path) = main_file.basename()
+            {
+                self.store_mask_in_cache(&path.to_string_lossy()).unwrap();
+            }
             self.drag_and_drop_regeneration_popup();
         }
         imp.drag_cancelled.set(false);

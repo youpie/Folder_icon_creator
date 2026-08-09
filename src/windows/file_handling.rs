@@ -1,8 +1,10 @@
 use crate::objects::errors::{ErrorPopup, IntoResult, show_error_popup};
-use crate::objects::file::File;
-use crate::objects::properties::{BottomImageType, FileProperties};
+use crate::objects::file::file::File;
+use crate::objects::file::mask::MaskOption;
+use crate::objects::properties::{BottomImageType, FileProperties, MaskType};
 use adw::{prelude::*, subclass::prelude::*};
 use gettextrs::gettext;
+use gio::glib::user_cache_dir;
 use gio::*;
 use gtk::{gdk, glib};
 use image::*;
@@ -14,14 +16,16 @@ use xmp_toolkit::{OpenFileOptions, XmpFile, XmpMeta, XmpValue, xmp_ns};
 
 use crate::{GenResult, IconicWindow};
 
+const SYSTEM_FOLDER_PATH: &str = "/app/share/Iconic/folders/";
+
 impl IconicWindow {
     // Load the correct folder based on settings
     // TODO This function is quite confusingly written
-    pub fn load_folder_path_from_settings(&self) {
+    pub fn set_up_and_load_bottom_icon(&self) {
         let imp = self.imp();
         let mut file_properties = imp.file_properties.try_borrow().unwrap().clone();
-
-        file_properties.bottom_image_type = BottomImageType::get_base(&self);
+        file_properties.mask = MaskType::from_settings(&imp.settings);
+        file_properties.bottom_image_type = BottomImageType::get_standard(&self);
         imp.file_properties.replace(file_properties);
         self.load_bottom_image();
     }
@@ -40,12 +44,12 @@ impl IconicWindow {
                     .clone();
 
                 let icon_path = match bottom_image_type {
-                    BottomImageType::Folder(color) => win.load_built_in_bottom_icon(&color),
+                    BottomImageType::Folder(color) => win.get_built_in_bottom_icon_path(&color),
                     BottomImageType::FolderCustom(fg, bg) => {
                         win.create_custom_folder_color(&fg, &bg, false).await
                     }
                     BottomImageType::Custom(path) => path,
-                    _ => win.load_built_in_bottom_icon("None"),
+                    _ => win.get_built_in_bottom_icon_path("None"),
                 };
 
                 if !imp.reset_color.is_visible() {
@@ -65,8 +69,11 @@ impl IconicWindow {
         regeneration: bool,
     ) -> PathBuf {
         info!("Creating custom folder colors");
+        let imp = self.imp();
+        let desktop = imp.file_properties.borrow().desktop;
         let folder_svg_file =
-            std::fs::read_to_string("/app/share/Iconic/folders/folder_Custom.svg").unwrap();
+            std::fs::read_to_string(format!("{SYSTEM_FOLDER_PATH}{desktop}/folder_Custom.svg"))
+                .unwrap();
         let folder_svg_lines = folder_svg_file.lines();
         let new_custom_folder: String = folder_svg_lines
             .map(|row| {
@@ -78,7 +85,7 @@ impl IconicWindow {
             })
             .collect();
         let new_custom_folder_bytes = new_custom_folder.as_bytes().to_owned();
-        let mut cache_location = Self::get_cache_path();
+        let mut cache_location = user_cache_dir();
         cache_location.push(format!(
             "custom_folder{}.svg",
             if regeneration { "_regeneration" } else { "" }
@@ -93,14 +100,15 @@ impl IconicWindow {
         cache_location
     }
 
-    pub fn load_built_in_bottom_icon(&self, accent_color_setting: &str) -> PathBuf {
-        // let imp = self.imp();
+    pub fn get_built_in_bottom_icon_path(&self, accent_color_setting: &str) -> PathBuf {
+        let imp = self.imp();
+        let desktop = imp.file_properties.borrow().desktop;
         let folder_color_name = match accent_color_setting {
             "None" => self.get_accent_color(),
             x => x.to_string(),
         };
         let folder_path = PathBuf::from(format!(
-            "/app/share/Iconic/folders/folder_{}.svg",
+            "{SYSTEM_FOLDER_PATH}{desktop}/folder_{}.svg",
             folder_color_name
         ));
         folder_path
@@ -400,16 +408,16 @@ impl IconicWindow {
             .map_err_to_str()?
             .replace(file.clone());
 
-        let base_image = {
+        let (base_image, mask) = {
             let base_lock = imp.bottom_image_file.lock().map_err_to_str()?;
             let base = base_lock
                 .as_ref()
                 .into_reason_result("No bottom image found")
                 .map_err_to_str()?;
             if small {
-                base.thumbnail.clone()
+                (base.thumbnail.clone(), base.thumbnail_mask.clone())
             } else {
-                base.dynamic_image.clone()
+                (base.image.clone(), base.image_mask.clone())
             }
         };
         debug!("Base: {}", base_image.width());
@@ -421,7 +429,7 @@ impl IconicWindow {
             if small {
                 top_image.thumbnail.clone()
             } else {
-                top_image.dynamic_image.clone()
+                top_image.image.clone()
             }
         };
         if use_monochrome {
@@ -442,6 +450,7 @@ impl IconicWindow {
         let generated_image = self
             .generate_image(
                 base_image,
+                self.serve_mask(mask),
                 top_image_dynamicimage,
                 imageops::FilterType::Gaussian,
                 imp.x_scale.value(),
@@ -463,7 +472,7 @@ impl IconicWindow {
         self.imp()
             .toast_overlay
             .add_toast(adw::Toast::new(&gettext("Icon reset")));
-        self.load_folder_path_from_settings();
+        self.set_up_and_load_bottom_icon();
     }
 
     pub async fn load_top_icon(&self) {
@@ -473,10 +482,7 @@ impl IconicWindow {
             Some(x) => {
                 self.load_top_file(x).await;
             }
-            None => {
-                imp.toast_overlay
-                    .add_toast(adw::Toast::new(&gettext("Nothing selected")));
-            }
+            None => (),
         };
         imp.image_loading_spinner.set_visible(false);
     }
@@ -488,13 +494,16 @@ impl IconicWindow {
         match self.open_file_chooser().await {
             Some(x) => {
                 imp.stack.set_visible_child_name("stack_main_page");
+
+                let mut file_properties = imp.file_properties.borrow().clone();
+                file_properties.bottom_image_type =
+                    BottomImageType::Custom(x.path().unwrap_or_default());
+                imp.file_properties.replace(file_properties);
+
                 self.new_iconic_file_creation(Some(x), None, size, thumbnail_size, false)
                     .await;
             }
-            None => {
-                imp.toast_overlay
-                    .add_toast(adw::Toast::new(&gettext("Nothing selected")));
-            }
+            None => (),
         };
     }
 
@@ -547,8 +556,16 @@ impl IconicWindow {
         } else {
             file.unwrap()
         };
+        let mask_path = if change_top_icon {
+            // A top image does not need a mask
+            MaskOption::Disabled
+        } else {
+            self.get_mask_path(None)
+        };
+
         let new_file = match gio::spawn_blocking(move || {
-            File::new(file_temp, svg_render_size, thumbnail_render_size)
+            // TODO image mask
+            File::new(file_temp, svg_render_size, thumbnail_render_size, mask_path)
                 .map_err(|err| err.to_string())
         })
         .await
@@ -651,6 +668,16 @@ impl IconicWindow {
             xmp_ns::XMP,
             "bottom_image_type",
             &XmpValue::new(serde_json::to_string(&properties.bottom_image_type)?),
+        )?;
+        metadata.set_property(
+            xmp_ns::XMP,
+            "mask",
+            &XmpValue::new(serde_json::to_string(&properties.mask)?),
+        )?;
+        metadata.set_property(
+            xmp_ns::XMP,
+            "desktop",
+            &XmpValue::new(serde_json::to_string(&properties.desktop)?),
         )?;
         metadata.set_property(
             xmp_ns::XMP,

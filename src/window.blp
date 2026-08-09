@@ -1,6 +1,18 @@
 using Gtk 4.0;
 using Adw 1;
 
+Adjustment percentage2 {
+  lower: -50;
+  upper: 50;
+  step-increment: 1;
+}
+
+Adjustment percentage {
+  lower: -50;
+  upper: 50;
+  step-increment: 1;
+}
+
 template $IconicWindow: Adw.ApplicationWindow {
   default-width: 400;
   default-height: 650;
@@ -22,7 +34,7 @@ template $IconicWindow: Adw.ApplicationWindow {
             [top]
             Adw.HeaderBar {
               title-widget: Adw.WindowTitle {
-                title: "Iconic";
+                title: _("Iconic");
               };
 
               [end]
@@ -62,7 +74,6 @@ template $IconicWindow: Adw.ApplicationWindow {
 
                 ProgressBar regeneration_osd_second {
                   fraction: 0.5;
-                  visible: true;
                   halign: fill;
 
                   styles [
@@ -100,7 +111,7 @@ template $IconicWindow: Adw.ApplicationWindow {
                     halign: center;
                     label: _("_Show Bottom Layer");
                     use-underline: true;
-                    action-name: "app.open_bottom_icon";
+                    action-name: "app.open_empty_bottom";
 
                     styles [
                       "pill",
@@ -128,6 +139,7 @@ template $IconicWindow: Adw.ApplicationWindow {
                   icon-name: "document-save-symbolic";
                 }
 
+                tooltip-text: _("Save the current image to disk");
                 margin-start: 5;
                 sensitive: false;
                 action-name: "app.save_button";
@@ -138,7 +150,7 @@ template $IconicWindow: Adw.ApplicationWindow {
               }
 
               title-widget: Adw.WindowTitle {
-                title: "Iconic";
+                title: _("Iconic");
               };
 
               [end]
@@ -197,13 +209,7 @@ template $IconicWindow: Adw.ApplicationWindow {
                         orientation: vertical;
                         tooltip-text: _("y-position of top image");
                         value-changed => $render_callback() swapped;
-
-                        adjustment: Adjustment percentage2 {
-                          lower: -50;
-                          upper: 50;
-                          step-increment: 1;
-                        };
-
+                        adjustment: percentage2;
                         vexpand: true;
                         digits: 0;
                         // draw-value: true;
@@ -250,13 +256,7 @@ template $IconicWindow: Adw.ApplicationWindow {
                           orientation: horizontal;
                           tooltip-text: _("x-position of top image");
                           value-changed => $render_callback() swapped;
-
-                          adjustment: Adjustment percentage {
-                            lower: -50;
-                            upper: 50;
-                            step-increment: 1;
-                          };
-
+                          adjustment: percentage;
                           hexpand: true;
                           // vexpand: true;
                           digits: 0;
@@ -413,8 +413,8 @@ template $IconicWindow: Adw.ApplicationWindow {
 menu primary_menu {
   section {
     item (_("_Paste Top Icon from Clipboard"), "app.paste")
-    item (_("_Open Top Icon"), "app.open_top_icon")
-    item (_("_Open Bottom Icon"), "app.select_folder")
+    item (_("_Select Top Icon"), "app.open_top_icon")
+    item (_("_Select Bottom Icon"), "app.select_folder")
   }
 
   section {
@@ -432,11 +432,12 @@ menu primary_menu {
 menu image_menu {
   section {
     item (_("Change Top Image"), "app.open_top_icon")
+    item (_("Remove overflow"), "win.enable-mask")
+    item (_("_Set Custom Mask*"), "win.custom-mask")
   }
 
   section {
-    item (_("Change Bottom Image"), "app.change_bottom")
-    item (_("Temporarily Change Bottom Image"), "app.select_folder")
+    item (_("Temporarily Change Bottom Image*"), "app.select_folder")
 
     submenu temp_folder_color {
       label: _("Temporarily Change Folder Color");
@@ -504,7 +505,84 @@ menu image_menu {
   }
 
   section {
-    item (_("Reset Temporary Bottom Image"), "app.reset_bottom")
+    item (_("Reset Temporary Bottom Image*"), "app.reset_bottom")
+    item (_("Reset Image"), "app.reset")
+  }
+}
+
+menu image_menu_simple {
+  section {
+    item (_("Change Top Image"), "app.open_top_icon")
+    item (_("Remove overflow"), "win.enable-mask")
+  }
+
+  section {
+    submenu temp_folder_color_simple {
+      label: _("Temporarily Change Folder Color");
+
+      item {
+        label: _("Blue");
+        action: "win.temp_folder_color";
+        target: "Blue";
+      }
+
+      item {
+        label: _("Teal");
+        action: "win.temp_folder_color";
+        target: "Teal";
+      }
+
+      item {
+        label: _("Green");
+        action: "win.temp_folder_color";
+        target: "Green";
+      }
+
+      item {
+        label: _("Yellow");
+        action: "win.temp_folder_color";
+        target: "Yellow";
+      }
+
+      item {
+        label: _("Orange");
+        action: "win.temp_folder_color";
+        target: "Orange";
+      }
+
+      item {
+        label: _("Red");
+        action: "win.temp_folder_color";
+        target: "Red";
+      }
+
+      item {
+        label: _("Pink");
+        action: "win.temp_folder_color";
+        target: "Pink";
+      }
+
+      item {
+        label: _("Purple");
+        action: "win.temp_folder_color";
+        target: "Purple";
+      }
+
+      item {
+        label: _("Slate");
+        action: "win.temp_folder_color";
+        target: "Slate";
+      }
+
+      item {
+        label: _("Custom");
+        action: "win.temp_folder_color";
+        target: "Custom";
+      }
+    }
+  }
+
+  section {
     item (_("Reset Image"), "app.reset")
   }
 }

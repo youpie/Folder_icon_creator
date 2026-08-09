@@ -7,14 +7,15 @@ use crate::IconicWindow;
 impl IconicWindow {
     pub async fn render_to_screen(&self) {
         let imp = self.imp();
-        let base = imp
+        let base_file = imp
             .bottom_image_file
             .lock()
             .unwrap()
             .as_ref()
             .unwrap()
-            .thumbnail
             .clone();
+        let base = base_file.thumbnail;
+        let base_mask = base_file.thumbnail_mask;
         let mut top_image = imp
             .top_image_file
             .lock()
@@ -31,19 +32,19 @@ impl IconicWindow {
                 None,
             );
         }
+        let generated_image = &self
+            .generate_image(
+                base,
+                self.serve_mask(base_mask),
+                top_image,
+                imageops::FilterType::Nearest,
+                imp.x_scale.value(),
+                imp.y_scale.value(),
+                imp.size.value(),
+            )
+            .await;
         self.image_save_sensitive(true);
-        let texture = self.dynamic_image_to_texture(
-            &self
-                .generate_image(
-                    base,
-                    top_image,
-                    imageops::FilterType::Nearest,
-                    imp.x_scale.value(),
-                    imp.y_scale.value(),
-                    imp.size.value(),
-                )
-                .await,
-        );
+        let texture = self.dynamic_image_to_texture(&generated_image);
         imp.image_view.set_paintable(&texture);
         imp.image_view.queue_draw();
     }
@@ -96,21 +97,26 @@ impl IconicWindow {
 
     pub async fn generate_image(
         &self,
-        base_image: image::DynamicImage,
-        top_image: image::DynamicImage,
+        base_image: DynamicImage,
+        base_mask: Option<DynamicImage>,
+        top_image: DynamicImage,
         filter: imageops::FilterType,
         x_scale_value: f64,
         y_scale_value: f64,
         scale: f64,
     ) -> DynamicImage {
         let imp = self.imp();
+        let empty_image = DynamicImage::new_rgba8(base_image.width(), base_image.height());
         let coordinates = ((x_scale_value + 50.0) as i64, (y_scale_value + 50.0) as i64);
         let texture = gio::spawn_blocking(move || {
+            let mut empty_base = empty_image;
             let mut base = base_image;
             let top = top_image;
-            let base_dimension: (i64, i64) =
-                ((base.dimensions().0).into(), (base.dimensions().1).into());
-            let top = IconicWindow::resize_top_image(top, base.dimensions(), scale, filter);
+            let base_dimension: (i64, i64) = (
+                (empty_base.dimensions().0).into(),
+                (empty_base.dimensions().1).into(),
+            );
+            let top = IconicWindow::resize_top_image(top, empty_base.dimensions(), scale, filter);
             let top_dimension: (i64, i64) = (
                 (top.dimensions().0 / 2).into(),
                 (top.dimensions().1 / 2).into(),
@@ -120,16 +126,21 @@ impl IconicWindow {
                 ((base_dimension.1 * coordinates.1) / 100) - top_dimension.1,
             );
             imageops::overlay(
-                &mut base,
+                &mut empty_base,
                 &top,
                 final_coordinates.0.into(),
                 final_coordinates.1.into(),
             );
+            empty_base = if let Some(mask) = base_mask {
+                IconicWindow::apply_mask_to_top_image(empty_base, mask)
+            } else {
+                empty_base
+            };
+            imageops::overlay(&mut base, &empty_base, 0, 0);
             base
         })
         .await
         .unwrap();
-
         imp.generated_image.replace(Some(texture.clone()));
         texture
     }

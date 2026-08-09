@@ -85,5 +85,13 @@
       <default>false</default>
       <summary>If true, the pop-up informing the user that adwaita colors has been detected has been shown</summary>
     </key>
+    <key name="advanced-settings" type="b">
+      <default>false</default>
+      <summary>If true, show the advanced settings page</summary>
+    </key>
+    <key name="mask-enabled" type="b">
+      <default>true</default>
+      <summary>If true, the mask to remove overhang is enabled</summary>
+    </key>
 	</schema>
 </schemalist>

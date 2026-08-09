@@ -1,6 +1,6 @@
 [package]
 name = "Iconic"
-version = "2026.4.1"
+version = "2026.8.1"
 edition = "2024"
 
 # override package level optimization, to always be maximum
@@ -19,31 +19,32 @@ strip = "symbols"
 [dependencies]
 gettext-rs = { version = "0.7.7", features = ["gettext-system"] }
 image = "0.25.10"
-gio = "0.22.5"
-librsvg = "2.62.1"
+gio = "0.22.8"
+librsvg = "2.62.3"
 cairo-rs = "0.22.0"
 resvg = "0.47.0"
 usvg = "0.47.0"
-log = "0.4.29"
+log = "0.4.33"
 pretty_env_logger = "0.5"
-rand = "0.10.1"
+rand = "0.10.2"
 hex = "0.4.3"
-thiserror = "2.0.18"
-gdk4 = "0.11.2"
-gsk4 = "0.11.1"
+thiserror = "2.0.19"
+gdk4 = "0.11.4"
+gsk4 = "0.11.4"
 xmp_toolkit = "1.12.1"
-serde_json = "1.0.149"
-serde = { version = "1.0.228", features = ["serde_derive"] }
-random_str = "1.1.0"
+serde_json = "1.0.151"
+serde = { version = "1.0.229", features = ["serde_derive"] }
 async-channel = "2.5.0"
+strum = { version = "0.28.0", features = ["derive"] }
+uuid = { version = "1.24.0", features = ["v7"] }
 
 
 [dependencies.gtk]
 package = "gtk4"
-version = "0.11.2"
-features = ["v4_18"]
+version = "0.11.4"
+features = ["gnome_50"]
 
 [dependencies.adw]
 package = "libadwaita"
-version = "0.9.1"
-features = ["v1_8"]
+version = "0.9.2"
+features = ["v1_9"]

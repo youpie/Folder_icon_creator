@@ -21,34 +21,38 @@
 use crate::config::{APP_ICON, APP_ID, PROFILE};
 use crate::glib::clone;
 use crate::objects::errors::show_error_popup;
-use crate::objects::file::File;
+use crate::objects::file::file::File;
 use crate::objects::properties::{BottomImageType, CustomRGB};
 use adw::{prelude::*, subclass::prelude::*};
+use gdk4::MemoryTexture;
 use gettextrs::gettext;
+use gio::glib::user_cache_dir;
 use gio::prelude::SettingsExt;
 use gtk::gdk::RGBA;
-use gtk::gdk_pixbuf::Pixbuf;
 use gtk::{gdk, glib};
 use image::*;
 use log::*;
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::env;
-use std::fs;
 use std::hash::RandomState;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
+const DEFAULT_X_SLIDER: f64 = 0.0;
+const DEFAULT_Y_SLIDER: f64 = 9.447;
+const DEFAULT_SIZE_SLIDER: f64 = 24.0;
+
 pub mod imp {
     use std::{cell::Cell, collections::HashMap, rc::Rc};
 
-    use gio::{SimpleAction, glib::VariantTy};
+    use gio::MenuModel;
 
     use crate::{
         objects::properties::FileProperties,
-        settings::settings::PreferencesDialog,
         windows::{
-            drag_drop::setup_drag_drop_logic, drag_overlay::DragOverlay,
+            actions::{set_up_klass_actions, set_up_stateful_actions},
+            drag_drop::setup_drag_drop_logic,
+            drag_overlay::DragOverlay,
             preview_window::PreviewWindow,
         },
     };
@@ -114,20 +118,31 @@ pub mod imp {
         pub regeneration_revealer: TemplateChild<gtk::Revealer>,
         #[template_child]
         pub drag_overlay: TemplateChild<DragOverlay>,
+        #[template_child]
+        pub image_menu_simple: TemplateChild<MenuModel>,
+        #[template_child]
+        pub image_menu: TemplateChild<MenuModel>,
 
         pub bottom_image_file: Arc<Mutex<Option<File>>>,
-        pub default_color: RefCell<HashMap<String, gdk::RGBA, RandomState>>,
         pub top_image_file: Arc<Mutex<Option<File>>>,
+        pub custom_mask: RefCell<Option<DynamicImage>>,
+
+        pub default_colors: RefCell<HashMap<String, gdk::RGBA, RandomState>>,
+
         pub saved_file: Arc<Mutex<Option<gio::File>>>,
         pub file_created: Cell<bool>,
         pub image_saved: Cell<bool>,
+
+        // This is used to, during the double image render of a drag operation, rename the larger file the same as the smaller file
         pub last_drag_n_drop_generated_name: RefCell<Option<gio::File>>,
+
+        // This generated image is used to quickly add an image to the mouse pointer during a drag operation
         pub generated_image: RefCell<Option<DynamicImage>>,
-        pub signals: RefCell<Vec<glib::SignalHandlerId>>,
         pub settings: gio::Settings,
-        pub count: Cell<i32>,
+
         pub regeneration_lock: Arc<Cell<usize>>,
         pub app_busy: Arc<()>,
+
         pub drag_active: Rc<Cell<bool>>,
         pub file_properties: RefCell<FileProperties>,
         pub drag_cancelled: Cell<bool>,
@@ -162,22 +177,23 @@ pub mod imp {
                 gesture_click: TemplateChild::default(),
                 regeneration_revealer: TemplateChild::default(),
                 drag_overlay: TemplateChild::default(),
+                image_menu: TemplateChild::default(),
+                image_menu_simple: TemplateChild::default(),
                 bottom_image_file: Arc::new(Mutex::new(None)),
                 top_image_file: Arc::new(Mutex::new(None)),
                 saved_file: Arc::new(Mutex::new(None)),
                 image_saved: Cell::new(true),
                 generated_image: RefCell::new(None),
                 file_created: Cell::new(false),
-                signals: RefCell::new(vec![]),
                 settings: gio::Settings::new(APP_ID),
-                count: Cell::new(0),
-                default_color: RefCell::new(HashMap::new()),
+                default_colors: RefCell::new(HashMap::new()),
                 last_drag_n_drop_generated_name: RefCell::new(None),
                 regeneration_lock: Arc::new(Cell::new(0)),
                 app_busy: Arc::new(()),
                 drag_active: Rc::new(Cell::new(false)),
                 file_properties: RefCell::new(FileProperties::default()),
                 drag_cancelled: Cell::new(false),
+                custom_mask: RefCell::new(None),
             }
         }
     }
@@ -191,110 +207,7 @@ pub mod imp {
         fn class_init(klass: &mut Self::Class) {
             Self::bind_template(klass);
             Self::Type::bind_template_callbacks(klass);
-            klass.install_action("app.open_top_icon", None, move |win, _, _| {
-                glib::spawn_future_local(clone!(
-                    #[weak]
-                    win,
-                    async move {
-                        win.load_top_icon().await;
-                    }
-                ));
-                debug!("References: {}", Arc::strong_count(&win.imp().app_busy));
-            });
-            klass.install_action("app.open_file_location", None, move |win, _, _| {
-                glib::spawn_future_local(clone!(
-                    #[weak]
-                    win,
-                    async move {
-                        let file = win.imp().saved_file.lock().unwrap().clone().unwrap();
-                        win.open_directory(&file).await;
-                    }
-                ));
-            });
-            klass.install_action("app.select_folder", None, move |win, _, _| {
-                glib::spawn_future_local(clone!(
-                    #[weak]
-                    win,
-                    async move {
-                        win.load_temp_folder_icon().await;
-                    }
-                ));
-            });
-            klass.install_action("app.open_bottom_icon", None, move |win, _, _| {
-                win.check_icon_update();
-            });
-            klass.install_action("app.change_bottom", None, move |win, _, _| {
-                let imp = win.imp();
-                _ = imp
-                    .settings
-                    .set_boolean("manual-bottom-image-selection", true);
-                let preferences = PreferencesDialog::new();
-                adw::prelude::AdwDialogExt::present(&preferences, Some(win));
-                preferences
-                    .activate_action("win.select_folder_settings", None)
-                    .unwrap();
-            });
-            klass.install_action("app.reset", None, move |win, _, _| {
-                let imp = win.imp();
-                win.default_sliders(false);
-                win.load_folder_path_from_settings();
-                let mut top_image = imp.top_image_file.lock().unwrap();
-                win.load_empty_top_image(&mut top_image);
-                imp.toast_overlay
-                    .add_toast(adw::Toast::new(&gettext("Image reset")));
-            });
-            klass.install_action("app.reset_bottom", None, move |win, _, _| {
-                win.reset_bottom_icon();
-            });
-            klass.install_action("app.paste", None, move |win, _, _| {
-                glib::spawn_future_local(clone!(
-                    #[weak]
-                    win,
-                    async move {
-                        win.paste_from_clipboard().await;
-                    }
-                ));
-            });
-            klass.install_action("app.regenerate", None, move |win, _, _| {
-                glib::spawn_future_local(clone!(
-                    #[weak]
-                    win,
-                    async move {
-                        let imp = win.imp();
-                        let id = imp.regeneration_lock.get();
-                        imp.regeneration_lock.replace(id + 1);
-                        match win.regenerate_icons().await {
-                            Ok(_) => (),
-                            Err(x) => {
-                                show_error_popup(&win, "", true, Some(x));
-                            }
-                        };
-                        //imp.stack.set_visible_child_name(&previous_stack);
-                        debug!("Done generating");
-                    }
-                ));
-            });
-            klass.install_action("app.save_button", None, move |win, _, _| {
-                glib::spawn_future_local(clone!(
-                    #[weak]
-                    win,
-                    async move {
-                        win.drag_and_drop_information_dialog();
-                        match win.open_save_file_dialog().await {
-                            Ok(_) => (),
-                            Err(error) => {
-                                show_error_popup(&win, &error.to_string(), true, Some(error));
-                            }
-                        };
-                    }
-                ));
-            });
-            klass.install_action("app.monochrome_switch", None, move |win, _, _| {
-                win.monochrome_swtich_change();
-            });
-            klass.install_action("app.reset_color", None, move |win, _, _| {
-                win.reset_colors();
-            });
+            set_up_klass_actions(klass);
         }
 
         fn instance_init(obj: &glib::subclass::InitializingObject<Self>) {
@@ -306,6 +219,7 @@ pub mod imp {
         fn constructed(&self) {
             self.parent_constructed();
             let obj = self.obj();
+            let imp = obj.imp();
             // If you read this and think of a more elegant way to achieve this, please let me know
             // This shares the value of if a drag operation is currently active
             // I now create a RefCell<Rc<Cell<bool>>>
@@ -318,41 +232,7 @@ pub mod imp {
 
             setup_drag_drop_logic(self);
 
-            let temp_bottom_folder = SimpleAction::new_stateful(
-                "temp_folder_color",
-                Some(&VariantTy::STRING),
-                &"".to_variant(),
-            );
-
-            temp_bottom_folder.connect_change_state(clone!(
-                #[weak (rename_to=win)]
-                obj,
-                move |action, para| {
-                    let imp = win.imp();
-                    let value = para.unwrap().str().unwrap().to_owned();
-                    debug!("{value}");
-                    if value != "" {
-                        let mut properties = imp.file_properties.try_borrow().unwrap().clone();
-                        properties.bottom_image_type = match value.as_str() {
-                            "Custom" => {
-                                let custom_primary_color: String =
-                                    imp.settings.string("primary-folder-color").into();
-                                let custom_secondary_color: String =
-                                    imp.settings.string("secondary-folder-color").into();
-                                BottomImageType::FolderCustom(
-                                    custom_primary_color,
-                                    custom_secondary_color,
-                                )
-                            }
-                            _ => BottomImageType::Folder(value),
-                        };
-                        imp.file_properties.replace(properties);
-                        win.load_bottom_image();
-                    }
-                    action.set_state(para.unwrap());
-                }
-            ));
-            self.obj().add_action(&temp_bottom_folder);
+            set_up_stateful_actions(imp);
         }
 
         fn dispose(&self) {
@@ -403,7 +283,7 @@ impl IconicWindow {
         if PROFILE == "Devel" {
             imp.main_status_page.set_icon_name(Some(APP_ICON));
         }
-        imp.default_color.replace(HashMap::from([
+        imp.default_colors.replace(HashMap::from([
             ("Blue".to_string(), RGBA::from_rgb(67, 141, 230)),
             ("Teal".to_string(), RGBA::from_rgb(18, 158, 176)),
             ("Green".to_string(), RGBA::from_rgb(61, 158, 79)),
@@ -421,14 +301,18 @@ impl IconicWindow {
     pub fn default_sliders(&self, add_marks: bool) {
         let imp = self.imp();
         if add_marks {
-            imp.x_scale.add_mark(0.0, gtk::PositionType::Top, None);
-            imp.y_scale.add_mark(0.0, gtk::PositionType::Bottom, None);
+            imp.x_scale
+                .add_mark(DEFAULT_X_SLIDER, gtk::PositionType::Top, None);
+            imp.y_scale
+                .add_mark(DEFAULT_X_SLIDER, gtk::PositionType::Bottom, None);
+            imp.y_scale
+                .add_mark(DEFAULT_Y_SLIDER, gtk::PositionType::Bottom, None);
+            imp.size
+                .add_mark(DEFAULT_SIZE_SLIDER, gtk::PositionType::Top, None);
         }
-        imp.size.add_mark(24.0, gtk::PositionType::Top, None);
-        imp.y_scale.add_mark(9.447, gtk::PositionType::Bottom, None);
-        imp.y_scale.set_value(9.447);
-        imp.size.set_value(24.0);
-        imp.x_scale.set_value(0.0);
+        imp.y_scale.set_value(DEFAULT_Y_SLIDER);
+        imp.size.set_value(DEFAULT_SIZE_SLIDER);
+        imp.x_scale.set_value(DEFAULT_X_SLIDER);
         let monochrome_switch_state = imp.settings.boolean("monochrome-mode-active");
         imp.monochrome_switch.set_active(monochrome_switch_state);
     }
@@ -446,7 +330,7 @@ impl IconicWindow {
         imp.stack.set_visible_child_name("stack_welcome_page");
         self.setup_settings();
         self.setup_update();
-        self.load_folder_path_from_settings();
+        self.set_up_and_load_bottom_icon();
         self.slider_control_sensitivity(false);
     }
 
@@ -456,7 +340,7 @@ impl IconicWindow {
             #[weak(rename_to = win)]
             self,
             move |_: &gio::Settings, _: &str| {
-                win.load_folder_path_from_settings();
+                win.set_up_and_load_bottom_icon();
             }
         );
 
@@ -468,7 +352,7 @@ impl IconicWindow {
                 if imp.file_properties.borrow().bottom_image_type == BottomImageType::FolderSystem {
                     // error!("Reloading folder image");
                     win.check_if_regeneration_needed();
-                    win.load_folder_path_from_settings();
+                    win.set_up_and_load_bottom_icon();
                 }
                 _ = imp
                     .settings
@@ -556,7 +440,7 @@ impl IconicWindow {
         };
 
         let color = imp
-            .default_color
+            .default_colors
             .borrow()
             .get(&accent_color)
             .unwrap_or(&RGBA::from_hex(accent_color))
@@ -575,7 +459,7 @@ impl IconicWindow {
     pub fn check_chache_icon(&self, file_name: &str) -> PathBuf {
         let imp = self.imp();
         let icon_path = PathBuf::from(&imp.settings.string("folder-svg-path"));
-        let cache_path = Self::get_cache_path();
+        let cache_path = user_cache_dir();
         let folder_icon_cache_path = cache_path.join(file_name);
         if folder_icon_cache_path.exists() {
             info!("File found in cache at: {:?}", folder_icon_cache_path);
@@ -600,40 +484,7 @@ impl IconicWindow {
         .unwrap();
 
         imp.settings.default_value("manual-bottom-image-selection");
-        self.load_built_in_bottom_icon("None")
-    }
-
-    pub fn get_cache_path() -> PathBuf {
-        let cache_path = match env::var("XDG_CACHE_HOME") {
-            Ok(value) => PathBuf::from(value),
-            Err(_) => {
-                let config_dir = PathBuf::from(env::var("HOME").unwrap())
-                    .join(".cache")
-                    .join(format!("nl.emphisia.icon"));
-                if !config_dir.exists() {
-                    fs::create_dir(&config_dir).unwrap();
-                }
-                config_dir
-            }
-        };
-        debug!("cache path {:?}", cache_path);
-        cache_path
-    }
-
-    pub fn get_data_path(&self) -> PathBuf {
-        let data_path = match env::var("XDG_DATA_HOME") {
-            Ok(value) => PathBuf::from(value),
-            Err(_) => {
-                let config_dir = PathBuf::from(env::var("HOME").unwrap())
-                    .join(".data")
-                    .join("nl.emphisia.icon");
-                if !config_dir.exists() {
-                    fs::create_dir(&config_dir).unwrap();
-                }
-                config_dir
-            }
-        };
-        data_path
+        self.get_built_in_bottom_icon_path("None")
     }
 
     // This checks if the main page, or welcome screen needs to be shown. And adds ability to loads just a bottom file
@@ -643,7 +494,7 @@ impl IconicWindow {
         let mut top_image = imp.top_image_file.lock().unwrap();
         let bottom_image = imp.bottom_image_file.lock().unwrap();
         if (*top_image).is_some() && (*bottom_image).is_some() {
-            let top_image_width = top_image.as_ref().unwrap().dynamic_image.width();
+            let top_image_width = top_image.as_ref().unwrap().image.width();
             if top_image_width > 1 {
                 // If the top image is empty, these controlls are disabled
                 // This is to check if it's needed to turn them on again
@@ -724,20 +575,18 @@ impl IconicWindow {
         let (width, height) = rgba_image.dimensions();
         let pixels = rgba_image.into_raw(); // Get the raw pixel data
         // Create Pixbuf from raw pixel data
-        let pixbuf = Pixbuf::from_bytes(
-            &glib::Bytes::from(&pixels),
-            gtk::gdk_pixbuf::Colorspace::Rgb,
-            true, // has_alpha
-            8,    // bits_per_sample
+        MemoryTexture::new(
             width as i32,
             height as i32,
-            width as i32 * 4, // rowstride
-        );
-        gdk::Texture::for_pixbuf(&pixbuf)
+            gdk4::MemoryFormat::R8g8b8a8,
+            &glib::Bytes::from(&pixels),
+            width as usize * 4,
+        )
+        .upcast()
     }
 
     // TODO decouple UI components from these functions
-    fn monochrome_swtich_change(&self) {
+    pub fn monochrome_switch_change(&self) {
         let imp = self.imp();
         let switch_state = imp.monochrome_switch.is_active();
         debug!("Updating monochrome state to {:?}", switch_state);
