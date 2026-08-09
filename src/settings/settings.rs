@@ -61,6 +61,8 @@ mod imp {
         #[template_child]
         pub ignore_custom: TemplateChild<adw::SwitchRow>,
         #[template_child]
+        pub strict_button: TemplateChild<adw::SwitchRow>,
+        #[template_child]
         pub strict_regeneration: TemplateChild<gtk::Switch>,
         #[template_child]
         pub automatic_regeneration: TemplateChild<adw::SwitchRow>,
@@ -119,6 +121,7 @@ mod imp {
                 preferences_page: TemplateChild::default(),
                 enable_advanced: TemplateChild::default(),
                 enable_overflow: TemplateChild::default(),
+                strict_button: TemplateChild::default(),
                 initialized: Cell::new(false),
             }
         }
@@ -266,6 +269,10 @@ impl PreferencesDialog {
             .build();
         imp.settings
             .bind("default-dnd-activated", &*imp.dnd_switch, "active")
+            .build();
+        imp.settings
+            .bind("strict-regeneration", &*imp.strict_button, "active")
+            .invert_boolean()
             .build();
         imp.settings
             .bind("strict-regeneration", &*imp.strict_regeneration, "active")

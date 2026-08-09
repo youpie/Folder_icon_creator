@@ -208,13 +208,14 @@ After regeneration, it is likely required to log out and in to see the changes"
         sensitive: bind store_top_images.active;
       }
 
-      // Adw.SwitchRow strict_button {
-      //   visible: bind enable_advanced.active inverted;
-      //   title: _("Loose Regeneration");
-      //   subtitle: _("Allow regeneration of folder images with \"Use system folder color\" disabled");
-      //   sensitive: bind store_top_images.active;
-      //   active: bind strict_regeneration.active bidirectional;
-      // }
+      Adw.SwitchRow strict_button {
+        visible: bind enable_advanced.active inverted;
+        title: _("Loose Regeneration");
+        subtitle: _("Allow regeneration of folder images with “Use system folder color” disabled");
+        sensitive: bind store_top_images.active;
+        active: bind strict_regeneration.active bidirectional;
+      }
+
       Adw.ExpanderRow strict_expander {
         visible: bind enable_advanced.active;
         title: _("Loose Regeneration*");

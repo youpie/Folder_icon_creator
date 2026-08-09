@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iconic\n"
 "Report-Msgid-Bugs-To: https://github.com/youpie/Folder_icon_creator\n"
-"POT-Creation-Date: 2026-08-09 13:27+0200\n"
+"POT-Creation-Date: 2026-08-09 13:46+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,7 +20,7 @@ msgstr ""
 
 #: data/nl.emphisia.icon.desktop.in.in:2
 #: data/nl.emphisia.icon.metainfo.xml.in.in:5
-#: data/nl.emphisia.icon.metainfo.xml.in.in:221 src/window.blp:37
+#: data/nl.emphisia.icon.metainfo.xml.in.in:235 src/window.blp:37
 #: src/window.blp:153
 msgid "Iconic"
 msgstr ""
@@ -67,39 +67,39 @@ msgstr ""
 msgid "Custom colored folder icons supported"
 msgstr ""
 
-#: data/nl.emphisia.icon.metainfo.xml.in.in:212
+#: data/nl.emphisia.icon.metainfo.xml.in.in:226
 msgid "icon"
 msgstr ""
 
-#: data/nl.emphisia.icon.metainfo.xml.in.in:213
+#: data/nl.emphisia.icon.metainfo.xml.in.in:227
 msgid "create"
 msgstr ""
 
-#: data/nl.emphisia.icon.metainfo.xml.in.in:214
+#: data/nl.emphisia.icon.metainfo.xml.in.in:228
 msgid "folder icon"
 msgstr ""
 
-#: data/nl.emphisia.icon.metainfo.xml.in.in:215
+#: data/nl.emphisia.icon.metainfo.xml.in.in:229
 msgid "svg"
 msgstr ""
 
-#: data/nl.emphisia.icon.metainfo.xml.in.in:216
+#: data/nl.emphisia.icon.metainfo.xml.in.in:230
 msgid "png"
 msgstr ""
 
-#: data/nl.emphisia.icon.metainfo.xml.in.in:217
+#: data/nl.emphisia.icon.metainfo.xml.in.in:231
 msgid "gnome"
 msgstr ""
 
-#: data/nl.emphisia.icon.metainfo.xml.in.in:218
+#: data/nl.emphisia.icon.metainfo.xml.in.in:232
 msgid "icon create"
 msgstr ""
 
-#: data/nl.emphisia.icon.metainfo.xml.in.in:219
+#: data/nl.emphisia.icon.metainfo.xml.in.in:233
 msgid "icon creator"
 msgstr ""
 
-#: data/nl.emphisia.icon.metainfo.xml.in.in:220
+#: data/nl.emphisia.icon.metainfo.xml.in.in:234
 msgid "folder icon creator"
 msgstr ""
 
@@ -160,7 +160,7 @@ msgctxt "shortcut window"
 msgid "Quit Iconic"
 msgstr ""
 
-#: src/gtk/shortcuts-dialog.blp:61 src/settings/settings.blp:240
+#: src/gtk/shortcuts-dialog.blp:61 src/settings/settings.blp:241
 msgid "Advanced"
 msgstr ""
 
@@ -334,28 +334,32 @@ msgstr ""
 msgid "Automatically regenerate the Icons when the system accent color changes"
 msgstr ""
 
-#: src/settings/settings.blp:220
-msgid "Loose Regeneration*"
+#: src/settings/settings.blp:213
+msgid "Loose Regeneration"
 msgstr ""
 
-#: src/settings/settings.blp:221
+#: src/settings/settings.blp:214 src/settings/settings.blp:222
 msgid ""
 "Allow regeneration of folder images with “Use system folder color” disabled"
 msgstr ""
 
-#: src/settings/settings.blp:233
-msgid "Ignore Custom Folders*"
+#: src/settings/settings.blp:221
+msgid "Loose Regeneration*"
 msgstr ""
 
 #: src/settings/settings.blp:234
+msgid "Ignore Custom Folders*"
+msgstr ""
+
+#: src/settings/settings.blp:235
 msgid "Don’t regenerate folder images with custom folder colors"
 msgstr ""
 
-#: src/settings/settings.blp:243
+#: src/settings/settings.blp:244
 msgid "Enable advanced settings"
 msgstr ""
 
-#: src/settings/settings.blp:244
+#: src/settings/settings.blp:245
 msgid "Items marked with an '*' after enabling this switch are advanced"
 msgstr ""
 
@@ -530,7 +534,7 @@ msgstr ""
 msgid "translator-credits"
 msgstr ""
 
-#: src/objects/errors.rs:17 src/settings/settings.rs:436
+#: src/objects/errors.rs:17 src/settings/settings.rs:443
 msgid "Error"
 msgstr ""
 
