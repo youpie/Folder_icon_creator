@@ -34,6 +34,20 @@
     </screenshot>
   </screenshots>
   <releases>
+    <release version="2026.8.1" date="2026-08-09" type="stable">
+      <description translate="no">
+        <p>Another new update for Iconic, wow! A friend of mine was asking for a new feature, but I ignored him. But then another friend asked for the same feature, and you know, I always listen to my friends so went to work implementing this feature. What is this feature you might ask?</p>
+        <p>Iconic now removed parts of the top image which don't overlap with the bottom image! WOW. This even works for custom bottom images! I did go a bit overboard so now, if you enable advanced mode (press ctrl+a) you can add custom masks, let your creativity flow!! And the best part, I used no AI! All brainpower baby.</p>
+        <p>I also did some other things like:</p>
+        <ul>
+          <li>Fixed bug with regenerating custom colored folder</li>
+          <li>Cleaned up small parts in the UI</li>
+          <li>Remember your advanced mode setting, even after a restart</li>
+        </ul>
+        <p>Yeah,, the other things are not that interesting, sorry. But! I am thinking about making Iconic also work for other desktop environments. So stay tuned for that!</p>
+        <p>That was all, I hope you have a nice day!!</p>
+      </description>
+    </release>
     <release version="2026.4.1" date="2026-04-12" type="stable">
       <description translate="no">
         <p>A new update for Iconic, this one is not that special but features some nice improvements. New features:</p>
@@ -65,7 +79,7 @@
       </description>
     </release>
     <release version="2025.3.2" date="2025-03-27" type="stable">
-      <description  translate="no">
+      <description translate="no">
         <p>Here I am, once again. A new update to Iconic is here with the following changes!</p>
         <ul>
           <li>Improved code</li>
@@ -129,7 +143,7 @@
         <p>As always, please let me know if you encounter any bugs!</p>
       </description>
     </release>
-    <release version="2024.10.1" date="2024-10-15" type="stable">
+    <release version="2024.10.1" date="2024-10-13" type="stable">
       <description translate="no">
         <p>This update to iconic is mostly just a version bump. However I do have some fun features I want to try and implement. If it is possible, idk yet. But I have already started working on it.</p>
         <p>Biggest changes</p>
@@ -168,7 +182,7 @@
         </ol>
       </description>
     </release>
-    <release version="1.1.1" date="2024-07-23" type="stable">
+    <release version="1.1.1" date="2024-07-24" type="stable">
       <description translate="no">
         <p>Another small update with a few additions and changes</p>
         <ol>
