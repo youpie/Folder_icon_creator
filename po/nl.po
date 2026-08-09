@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Iconic\n"
 "Report-Msgid-Bugs-To: https://github.com/youpie/Folder_icon_creator\n"
-"POT-Creation-Date: 2026-08-09 13:27+0200\n"
-"PO-Revision-Date: 2026-08-09 13:42+0200\n"
+"POT-Creation-Date: 2026-08-09 13:46+0200\n"
+"PO-Revision-Date: 2026-08-09 13:49+0200\n"
 "Last-Translator: Youpie <youplamb@hotmail.nl>\n"
 "Language-Team: Dutch\n"
 "Language: nl\n"
@@ -21,7 +21,7 @@ msgstr ""
 
 #: data/nl.emphisia.icon.desktop.in.in:2
 #: data/nl.emphisia.icon.metainfo.xml.in.in:5
-#: data/nl.emphisia.icon.metainfo.xml.in.in:221 src/window.blp:37
+#: data/nl.emphisia.icon.metainfo.xml.in.in:235 src/window.blp:37
 #: src/window.blp:153
 msgid "Iconic"
 msgstr "Iconic"
@@ -75,39 +75,39 @@ msgstr "Hoofdmenu in dark mode"
 msgid "Custom colored folder icons supported"
 msgstr "Folders met zelfgekozen kleuren ondersteund"
 
-#: data/nl.emphisia.icon.metainfo.xml.in.in:212
+#: data/nl.emphisia.icon.metainfo.xml.in.in:226
 msgid "icon"
 msgstr "icoon"
 
-#: data/nl.emphisia.icon.metainfo.xml.in.in:213
+#: data/nl.emphisia.icon.metainfo.xml.in.in:227
 msgid "create"
 msgstr "maken"
 
-#: data/nl.emphisia.icon.metainfo.xml.in.in:214
+#: data/nl.emphisia.icon.metainfo.xml.in.in:228
 msgid "folder icon"
 msgstr "folder icoon"
 
-#: data/nl.emphisia.icon.metainfo.xml.in.in:215
+#: data/nl.emphisia.icon.metainfo.xml.in.in:229
 msgid "svg"
 msgstr "svg"
 
-#: data/nl.emphisia.icon.metainfo.xml.in.in:216
+#: data/nl.emphisia.icon.metainfo.xml.in.in:230
 msgid "png"
 msgstr "png"
 
-#: data/nl.emphisia.icon.metainfo.xml.in.in:217
+#: data/nl.emphisia.icon.metainfo.xml.in.in:231
 msgid "gnome"
 msgstr "gnome"
 
-#: data/nl.emphisia.icon.metainfo.xml.in.in:218
+#: data/nl.emphisia.icon.metainfo.xml.in.in:232
 msgid "icon create"
 msgstr "icoon maken"
 
-#: data/nl.emphisia.icon.metainfo.xml.in.in:219
+#: data/nl.emphisia.icon.metainfo.xml.in.in:233
 msgid "icon creator"
 msgstr "icoon maker"
 
-#: data/nl.emphisia.icon.metainfo.xml.in.in:220
+#: data/nl.emphisia.icon.metainfo.xml.in.in:234
 msgid "folder icon creator"
 msgstr "folder icoon maker"
 
@@ -168,7 +168,7 @@ msgctxt "shortcut window"
 msgid "Quit Iconic"
 msgstr "Sluit Iconic"
 
-#: src/gtk/shortcuts-dialog.blp:61 src/settings/settings.blp:240
+#: src/gtk/shortcuts-dialog.blp:61 src/settings/settings.blp:241
 msgid "Advanced"
 msgstr "Geadvanceerd"
 
@@ -356,36 +356,34 @@ msgstr ""
 "Als ingeschakeld zullen folders automatisch geregenereerd worden als de "
 "systeem accent kleur veranderd"
 
-#: src/settings/settings.blp:220
-msgid "Loose Regeneration*"
+#: src/settings/settings.blp:213
+msgid "Loose Regeneration"
 msgstr "Vrije Regeneratie"
 
-#: src/settings/settings.blp:221
-#, fuzzy
-#| msgid ""
-#| "Allow regeneration of folder images with \"Use system folder color\" "
-#| "disabled"
+#: src/settings/settings.blp:214 src/settings/settings.blp:222
 msgid ""
 "Allow regeneration of folder images with “Use system folder color” disabled"
 msgstr ""
-"Sta regeneratie van afbeeldingen gemaakt met \"Gebruik Systeem Kleur\" "
+"Sta regeneratie van afbeeldingen gemaakt met “Gebruik Systeem Kleur” "
 "uitgeschakeld toe"
 
-#: src/settings/settings.blp:233
+#: src/settings/settings.blp:221
+msgid "Loose Regeneration*"
+msgstr "Vrije Regeneratie"
+
+#: src/settings/settings.blp:234
 msgid "Ignore Custom Folders*"
 msgstr "Negeer Folders met Aangepaste Kleuren*"
 
-#: src/settings/settings.blp:234
-#, fuzzy
-#| msgid "Don't regenerate folder images with custom folder colors"
+#: src/settings/settings.blp:235
 msgid "Don’t regenerate folder images with custom folder colors"
 msgstr "Regenereer geen folders met handmatig ingestelde kleuren"
 
-#: src/settings/settings.blp:243
+#: src/settings/settings.blp:244
 msgid "Enable advanced settings"
 msgstr "Toon geavanceerde instellingen"
 
-#: src/settings/settings.blp:244
+#: src/settings/settings.blp:245
 msgid "Items marked with an '*' after enabling this switch are advanced"
 msgstr "Opties gemarkeerd met '*' zijn geadvanceerd"
 
@@ -424,7 +422,7 @@ msgstr "Opslaan"
 
 #: src/window.blp:142
 msgid "Save the current image to disk"
-msgstr ""
+msgstr "Sla huidige afbeelding op"
 
 #: src/window.blp:210
 msgid "y-position of top image"
@@ -487,16 +485,12 @@ msgid "_Paste Top Icon from Clipboard"
 msgstr "_Plak Bovenste Icoon uit Klemboord"
 
 #: src/window.blp:416
-#, fuzzy
-#| msgid "_Open Top Icon"
 msgid "_Select Top Icon"
-msgstr "_Open bovenste Icoon"
+msgstr "_Open Bovenste Icoon"
 
 #: src/window.blp:417
-#, fuzzy
-#| msgid "_Reset Bottom Icon"
 msgid "_Select Bottom Icon"
-msgstr "_Reset onderste Icoon"
+msgstr "_Selecteer Onderste Icoon"
 
 #: src/window.blp:421
 msgid "_Reset Bottom Icon"
@@ -524,27 +518,23 @@ msgstr "Verander bovenste afbeelding"
 
 #: src/window.blp:435 src/window.blp:516
 msgid "Remove overflow"
-msgstr ""
+msgstr "Verwijder overvloei"
 
 #: src/window.blp:436
 msgid "_Set Custom Mask*"
-msgstr ""
+msgstr "_Gebruik Aangepast Masker*"
 
 #: src/window.blp:440
-#, fuzzy
-#| msgid "Temporarily Change Bottom Image"
 msgid "Temporarily Change Bottom Image*"
-msgstr "Open tijdelijke onderste afbeelding"
+msgstr "Open Tijdelijke Onderste Afbeelding*"
 
 #: src/window.blp:443 src/window.blp:521
 msgid "Temporarily Change Folder Color"
 msgstr "Folder Kleur Tijdelijk Aanpassen"
 
 #: src/window.blp:508
-#, fuzzy
-#| msgid "Reset Temporary Bottom Image"
 msgid "Reset Temporary Bottom Image*"
-msgstr "Reset Tijdelijke Onderste Afbeelding"
+msgstr "Reset Tijdelijke Onderste Afbeelding*"
 
 #: src/window.blp:509 src/window.blp:586
 msgid "Reset Image"
@@ -572,7 +562,7 @@ msgstr ""
 msgid "translator-credits"
 msgstr "Youpie https://github.com/youpie"
 
-#: src/objects/errors.rs:17 src/settings/settings.rs:436
+#: src/objects/errors.rs:17 src/settings/settings.rs:443
 msgid "Error"
 msgstr "Fout"
 
