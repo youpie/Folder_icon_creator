@@ -118,7 +118,7 @@ template $PreferencesDialog: Adw.PreferencesDialog {
 
       Adw.SwitchRow enable_overflow {
         title: _("Mask overflow*");
-        subtitle: _("Whether to remove parts of the top image that overflow the bottom image");
+        subtitle: _("Remove parts of the top image that overflow the bottom image");
         visible: bind enable_advanced.active;
       }
     }
@@ -188,9 +188,11 @@ template $PreferencesDialog: Adw.PreferencesDialog {
             use-markup: true;
             margin-start: 10;
             margin-end: 10;
-            label: _("Iconic is able to <i>Regenerate</i> compatible icons. Regeneration is the ability to change the color of a folder image after it has already been created when the system accent color has been changed.\
+            label: _(
+              "Iconic is able to <i>Regenerate</i> compatible icons. Regeneration is the ability to change the color of a folder image after it has already been created when the system accent color has been changed.\
 This is useful in combination with <a href=\"https://github.com/dpejoh/Adwaita-colors\"><b>Adwaita Colors</b></a> which automatically changes the color of all folders based on the current accent color.\
-After regeneration, it is likely required to log out and in to see the changes");
+After regeneration, it is likely required to log out and in to see the changes"
+            );
           }
         }
       }
@@ -216,7 +218,7 @@ After regeneration, it is likely required to log out and in to see the changes")
       Adw.ExpanderRow strict_expander {
         visible: bind enable_advanced.active;
         title: _("Loose Regeneration*");
-        subtitle: _("Allow regeneration of folder images with \"Use system folder color\" disabled");
+        subtitle: _("Allow regeneration of folder images with “Use system folder color” disabled");
         expanded: false;
         enable-expansion: bind strict_regeneration.active;
 
@@ -229,7 +231,7 @@ After regeneration, it is likely required to log out and in to see the changes")
 
         Adw.SwitchRow ignore_custom {
           title: _("Ignore Custom Folders*");
-          subtitle: _("Don't regenerate folder images with custom folder colors");
+          subtitle: _("Don’t regenerate folder images with custom folder colors");
         }
       }
     }

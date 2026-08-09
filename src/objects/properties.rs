@@ -33,7 +33,8 @@ pub struct FileProperties {
     pub monochrome_threshold_val: u8,
     pub mask: MaskType,
     pub desktop: DesktopEnvironment,
-    pub default: bool, // If the values above are still equal with the generated image. False if for example, the image was regenerated
+    /// If the values above are still equal with the generated image. False if for example, the image was regenerated
+    pub default: bool,
 }
 
 impl FileProperties {

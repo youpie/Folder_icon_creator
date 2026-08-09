@@ -223,7 +223,7 @@ impl IconicWindow {
         let file_path = file.path();
         let filename: String = file.file_name().to_string_lossy().to_string();
 
-        let strict_mode_enabled = imp.settings.boolean("strict-regeneration");
+        let strict_mode_enabled = imp.settings.boolean("strict-regeneration"); // CAUTION: strict mode is the opposite of how it is displayed in the UI, there it is loose mode
         let ignore_custom_colored = imp.settings.boolean("ignore-custom");
 
         // Icons that are compatible for regeneration are only allowed to use default folder images.
@@ -247,7 +247,7 @@ impl IconicWindow {
                 BottomImageType::FolderCustom(foreground, background)
                     if !properties.default || (!strict_mode_enabled || !ignore_custom_colored) =>
                 {
-                    // If ignore custom folders is enabled, it regenerate it, but without any changes
+                    // If ignore custom folders is enabled, it regenerate it, but without any changes in case it was previously regenerated
                     if strict_mode_enabled || ignore_custom_colored {
                         let folder_path = self
                             .create_custom_folder_color(&foreground, &background, true)
@@ -259,6 +259,7 @@ impl IconicWindow {
                         })
                         .await
                         .unwrap()?;
+
                         (
                             image_file.image,
                             image_file.image_mask,
@@ -271,7 +272,14 @@ impl IconicWindow {
                             .get_bottom_icon_from_accent_color(None, strict_mode_enabled)
                             .await?;
                         let mask = self.load_mask(&properties, &filename, &bottom_image);
-                        (bottom_image, mask, None, Some(background))
+
+                        let custom_hex_color = if properties.monochrome_default {
+                            None
+                        } else {
+                            Some(background)
+                        };
+
+                        (bottom_image, mask, None, custom_hex_color)
                     }
                 }
                 _ => return Ok(()),
@@ -438,7 +446,7 @@ impl IconicWindow {
                 properties.monochrome_color.unwrap_or_default().2 as f32 / 255.0,
                 1.0,
             ),
-            true if rgb_string_color.is_some() && strict => {
+            true if rgb_string_color.is_some() => {
                 RGBA::from_hex(rgb_string_color.unwrap_or_default())
             }
             true => self.current_accent_rgba(if strict { accent_color } else { None })?,
