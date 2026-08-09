@@ -37,12 +37,15 @@ pub struct FileProperties {
 }
 
 impl FileProperties {
+    // File properties are not (yet) automatically copied from the global file properties.
+    // Remember to manually add that link in this function
     pub fn new(
         imp: &IconicWindow,
         top_image_hash: Option<u64>,
         default_monochrome_color: gdk::RGBA,
     ) -> Self {
         let imp = imp.imp();
+        let global_file_properties = imp.file_properties.borrow().clone();
         let x_val = imp.x_scale.value();
         let y_val = imp.y_scale.value();
         let zoom_val = imp.size.value();
@@ -58,9 +61,9 @@ impl FileProperties {
         let monochrome_default = default_monochrome_color == imp.monochrome_color.rgba();
         let monochrome_threshold_val = imp.threshold_scale.value() as u8;
         let monochrome_invert = imp.monochrome_invert.is_active();
-        let mask = MaskType::default();
-        let desktop = DesktopEnvironment::default();
-        let bottom_image_type = imp.file_properties.borrow().bottom_image_type.clone();
+        let mask = global_file_properties.mask;
+        let desktop = DesktopEnvironment::default(); // TODO custom desktop logic
+        let bottom_image_type = global_file_properties.bottom_image_type;
         Self {
             bottom_image_type,
             top_image_hash,
@@ -322,14 +325,12 @@ impl BottomImageType {
     }
 }
 
-pub type MaskName = String;
-
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub enum MaskType {
     #[default]
     Disabled,
     Automatic,
-    Custom(MaskName),
+    Custom,
 }
 
 impl MaskType {

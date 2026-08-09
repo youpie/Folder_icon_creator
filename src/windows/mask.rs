@@ -5,7 +5,6 @@ use adw::subclass::prelude::*;
 use gio::{glib::user_cache_dir, prelude::FileExt};
 use image::{DynamicImage, GenericImageView};
 use log::*;
-use uuid::Uuid;
 
 use crate::{
     GenResult,
@@ -48,18 +47,15 @@ impl IconicWindow {
             match mask_setting {
                 MaskType::Automatic => Some(mask),
                 MaskType::Disabled => None,
-                MaskType::Custom(_) => {
+                MaskType::Custom => {
                     let custom_mask = imp.custom_mask.borrow().clone();
                     if let Some(custom_mask) = custom_mask  // Custom mask must be the same dimension as normal mask for correct function
                         && custom_mask.dimensions() != mask.dimensions()
                     {
-                        // This resize function makes the custom mask implementation really slow, but I dont really care
-                        // As almost nobody will probably even use it
-                        Some(custom_mask.resize_exact(
-                            mask.width(),
-                            mask.height(),
-                            image::imageops::FilterType::Nearest,
-                        ))
+                        // The custom mask dimensions are not adjusted to the bottom image dimensions
+                        // That means it has to resize them every time the image is generated
+                        // That is quite slow, but probably nobody will even use the feature so it doens't matter
+                        Some(custom_mask)
                     } else {
                         None
                     }
@@ -81,8 +77,20 @@ impl IconicWindow {
     }
 
     /// This applies a mask to a top image.
-    /// Mask should be the same size of the base image
-    pub fn apply_mask_to_top_image(top_image: DynamicImage, mask: DynamicImage) -> DynamicImage {
+    /// Mask should be the same size of the base image, otherwise a slow resize will be used
+    pub fn apply_mask_to_top_image(
+        top_image: DynamicImage,
+        mut mask: DynamicImage,
+    ) -> DynamicImage {
+        if top_image.dimensions() != mask.dimensions() {
+            debug!("Resized mask due to different dimensions");
+            mask = mask.resize_exact(
+                top_image.width(),
+                top_image.height(),
+                image::imageops::FilterType::Nearest,
+            );
+        }
+
         let mask_pixels = mask.to_rgba8();
         let mut top_image_pixels = top_image.to_rgba8();
         for (x, y, pixel) in top_image_pixels.enumerate_pixels_mut() {
@@ -111,10 +119,8 @@ impl IconicWindow {
         let imp = self.imp();
         let file_option = self.open_file_chooser().await;
         if let Some(file) = file_option {
-            let file_name = Uuid::now_v7().to_string();
-
             let mut properties = imp.file_properties.borrow().clone();
-            properties.mask = MaskType::Custom(file_name);
+            properties.mask = MaskType::Custom;
             imp.file_properties.replace(properties);
             debug!("Setting custom mask to {:?}", file.path());
             let image = File::load_file(&file, 1024)?;
@@ -138,9 +144,7 @@ impl IconicWindow {
         let mask_path = match mask_type {
             MaskType::Automatic => self.get_mask_path(Some(properties.clone())),
             MaskType::Disabled => MaskOption::Disabled,
-            MaskType::Custom(_) => {
-                MaskOption::Custom(user_cache_dir().join("masks").join(file_name))
-            }
+            MaskType::Custom => MaskOption::Custom(user_cache_dir().join("mask").join(file_name)),
         };
         File::create_mask_dynamicimage(mask_path, bottom_image)
     }

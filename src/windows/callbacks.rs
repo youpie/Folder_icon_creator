@@ -75,7 +75,7 @@ impl IconicWindow {
                         action.change_state(&true.to_variant());
                         custom.change_state(&false.to_variant())
                     }
-                    MaskType::Custom(_) => {
+                    MaskType::Custom => {
                         action.change_state(&true.to_variant());
                         custom.change_state(&true.to_variant())
                     }

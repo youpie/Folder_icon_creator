@@ -145,7 +145,7 @@ impl IconicWindow {
                     )
                     .await;
                 info!("Done image drag generation");
-                std::fs::rename(
+                _ = std::fs::rename(
                     gio_file_temp.path().unwrap(),
                     gio_file_clone.path().unwrap(),
                 )

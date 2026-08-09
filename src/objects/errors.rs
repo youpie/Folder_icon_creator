@@ -51,7 +51,7 @@ where
 pub trait ErrorPopup<T, E> {
     fn _popup(&self, window: &IconicWindow) -> &Self;
     fn _popup_owned(self, window: &IconicWindow) -> Self;
-    fn log(self);
+    fn log(self) -> Self;
     fn map_err_to_str(self) -> GenResult<T>;
 }
 
@@ -59,10 +59,12 @@ impl<T, E> ErrorPopup<T, E> for Result<T, E>
 where
     E: Display,
 {
-    fn log(self) {
-        if let Err(error) = self {
+    /// If `Err(T)` Log T to console
+    fn log(self) -> Self {
+        if let Err(error) = &self {
             warn!("Error: {}", error.to_string());
         }
+        self
     }
     fn _popup(&self, window: &IconicWindow) -> &Self {
         if let Err(error) = self {

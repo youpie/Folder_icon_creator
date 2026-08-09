@@ -78,7 +78,7 @@ impl File {
 
         // Mask logic
         let (image_mask, thumbnail_mask) =
-            Self::get_masks(size, thumbnail_size, &image, mask_path)?;
+            Self::get_masks(size, thumbnail_size, &image, &mask_path)?;
 
         Ok(Self {
             files: Some(image_file),

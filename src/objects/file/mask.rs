@@ -1,9 +1,11 @@
 use std::path::PathBuf;
 
 use image::{DynamicImage, imageops};
-use log::*;
 
-use crate::{GenResult, objects::file::file::File};
+use crate::{
+    GenResult,
+    objects::{errors::ErrorPopup, file::file::File},
+};
 
 type MainMask = DynamicImage;
 type ThumbnailMask = DynamicImage;
@@ -33,10 +35,10 @@ impl super::file::File {
     pub(super) fn get_masks(
         main_size: u32,
         thumbnail_size: u32,
-        image: &DynamicImage,
-        mask_path: MaskOption,
+        bottom_image: &DynamicImage,
+        mask_path: &MaskOption,
     ) -> GenResult<(Option<MainMask>, Option<ThumbnailMask>)> {
-        if mask_path == MaskOption::Disabled {
+        if mask_path == &MaskOption::Disabled {
             return Ok((None, None));
         }
         let image_mask = if let MaskOption::Custom(path) = mask_path {
@@ -44,7 +46,7 @@ impl super::file::File {
                 .map_err(|e| format!("Failed to load path: {}", e.to_string()))?
                 .0
         } else {
-            Self::auto_generate_mask(&image)
+            Self::auto_generate_mask(&bottom_image)
         };
         let thumbnail_mask = if thumbnail_size > 0 {
             Some(image_mask.clone().resize_exact(
@@ -63,18 +65,11 @@ impl super::file::File {
         bottom_image: &DynamicImage,
     ) -> Option<DynamicImage> {
         let size = bottom_image.height();
-        let mut auto_generated_mask = DynamicImage::new_rgba8(size, size);
-        if mask_path == MaskOption::Automatic {
-            auto_generated_mask = File::auto_generate_mask(bottom_image); // The auto generated mask only needs to be filled in if it actually needs to be created
-        }
-        match mask_path {
-            MaskOption::Disabled => None,
-            _ => File::get_masks(size, 0, &auto_generated_mask, mask_path)
-                .map(|x| {
-                    warn!("Failed to load mask, automatically generating");
-                    x.0.unwrap_or_else(|| File::auto_generate_mask(bottom_image))
-                })
-                .ok(),
-        }
+        File::get_masks(size, 0, &bottom_image, &mask_path)
+            .map(|x| {
+                x.0.unwrap_or_else(|| File::auto_generate_mask(bottom_image))
+            })
+            .log()
+            .ok()
     }
 }
